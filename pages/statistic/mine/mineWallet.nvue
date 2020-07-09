@@ -1,0 +1,194 @@
+<template>
+  <div class="s_mineWallet">
+    <div class="wallet_top">
+      <div class="wallet_left">
+        <text class="wallet_left_text">账户余额</text>
+        <text class="wallet_left_num">{{(msg.balance / 100).toFixed(2)}}元</text>
+      </div>
+      <div class="wallet_right">
+        <text class="wallet_right_btn" @click="goPage">提现</text>
+      </div>
+    </div>
+    <scroll-view show-scrollbar=false scroll-y=true class="count_list">
+      <div class="count_single" v-for="(item,index) in countList" :style="(index === (countList.length - 1))?'border-bottom-width:0;':''">
+        <div class="mine_wallet_single_top">
+          <text class="mine_wallet_single_top_title">{{item.type===1?'提现':'任务赏金'}}</text>
+          <text class="mine_wallet_single_top_content">{{item.payment===1?'+':'-'}}{{item.amount / 100}}</text>
+        </div>
+        <text class="mine_wallet_single_top_date">{{item.created}}</text>
+      </div>
+    </scroll-view>
+  </div>
+</template>
+
+<script>
+  import http from '@/utils/request'
+  export default {
+    data() {
+      return {
+        pageNum: 1,
+        pageSize: 10,
+        pages: 0,
+        msg: {},
+        countList: []
+      }
+    },
+    onLoad(e) {
+      this.msg = JSON.parse(e.msg)
+    },
+    onShow() {
+      this.initData(false)
+    },
+    onHide() {
+
+    },
+    methods: {
+      //获取数据
+      initData(e) {
+        let that = this
+        let data = {
+          pageNum: this.pageNum,
+          pageSize: this.pageSize
+        }
+        http('get', 'userPaymentRecord/page', data, res => {
+          if (res.code == 200) {
+            let msg = res.data.records
+            if (e) {
+              let newList = that.countList.concat(msg)
+              that.countList = newList
+            } else {
+              that.countList = msg
+            }
+            that.pages = res.data.pages
+          }
+        })
+      },
+      goPage() {
+        if (this.msg.balance == 0) {
+          uni.showToast({
+            title: '您的账户余额不足，无法提现',
+            icon: 'none'
+          })
+          return
+        }
+        uni.navigateTo({
+          url: `/pages/statistic/mine/withdrawal?balance=${this.msg.balance / 100}`
+        })
+      }
+    },
+    onNavigationBarButtonTap: function onNavigationBarButtonTap(e) {
+      uni.navigateBack({
+        delta: 1
+      });
+    },
+    onPullDownRefresh() {
+      this.pageNum = 1
+      this.initData(false)
+      uni.stopPullDownRefresh();
+    },
+    onReachBottom() {
+      if (this.pageNum < this.pages) {
+        this.pageNum += 1
+        this.initData(true)
+      }
+    }
+  }
+</script>
+
+<style>
+  .mine_wallet_single_top_title,
+  .mine_wallet_single_top_content {
+    height: 20px;
+    font-size: 14px;
+    font-weight: 400;
+    color: rgba(0, 0, 0, 1);
+    line-height: 20px;
+  }
+
+  .mine_wallet_single_top_date {
+    height: 14px;
+    font-size: 10px;
+    font-weight: 400;
+    color: rgba(0, 0, 0, 1);
+    line-height: 14px;
+  }
+
+  .s_mineWallet {
+		flex: 1;
+		background-color: #fff;
+    overflow-y: scroll;
+    padding: 0 22rpx;
+    font-family: PingFang-SC-Medium, PingFang-SC;
+  }
+
+  .input_name {
+    font-size: 28rpx;
+  }
+
+  .realName_item {
+    padding: 48rpx 20rpx 18rpx;
+    border-bottom-width: 1px;
+    border-bottom-style: solid;
+    border-bottom-color: #DCDCDC;
+  }
+
+  .wallet_top {
+    justify-content: space-between;
+    height: 110px;
+    padding: 11px 10px 11px 25px;
+    flex-direction: row;
+    align-items: flex-end;
+    border-radius: 8px;
+    background-color: #496DF5;
+  }
+
+  .wallet_left_text {
+    color: #fff;
+  }
+
+  .wallet_right {
+    width: 60px;
+    height: 30px;
+    background-color: #fff;
+    border-radius: 8px;
+  }
+
+  .wallet_right_btn {
+    color: #496DF5;
+    line-height: 30px;
+    font-size: 14px;
+    width: 60px;
+    height: 30px;
+    text-align: center;
+  }
+
+  .wallet_left_num {
+    height: 42px;
+    line-height: 42px;
+    color: #fff;
+    font-size: 30px;
+  }
+
+  .wallet_left_text {
+    height: 25px;
+    line-height: 25px;
+    font-size: 18px;
+  }
+
+  .count_list {
+    padding-top: 20px;
+    overflow-y: scroll;
+  }
+
+  .count_single {
+    padding: 19px 10px 9px;
+    border-bottom-width: 1px;
+    border-bottom-color: #DCDCDC;
+    border-bottom-style: solid;
+  }
+
+  .mine_wallet_single_top {
+    justify-content: space-between;
+    flex-direction: row;
+  }
+</style>

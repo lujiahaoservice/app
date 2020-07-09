@@ -1,0 +1,1460 @@
+{
+	"pages": [
+		{
+			"path": "pages/start",
+			"style": {
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path": "pages/login/sel_like",
+			"style": {
+				"navigationStyle": "custom",
+				"app-plus": {
+					"scrollIndicator": "none",
+					"bounce": "none"
+				}
+			}
+		},
+		{
+			"path": "pages/index/home/home",
+			"style": {
+				"navigationBarTitleText": "",
+				"app-plus": {
+					"enablePullDownRefresh": true,
+					"scrollIndicator": "none",
+					"bounce": "none",
+					"titleNView": {
+						"type": "default",
+						"autoBackButton": "false",
+						"buttons": [
+							{
+								"type": "none",
+								"float": "left",
+								"width": "15px"
+							},
+							{
+								"type": "none",
+								"fontSize": "20px",
+								"float": "left",
+								"width": "20px"
+							},
+							{
+								"text": "首页",
+								"fontSize": "18px",
+								"float": "left",
+								"width": "80px"
+							},
+							{
+								"type": "none",
+								"float": "right",
+								"width": "15px"
+							}
+						]
+					}
+				}
+			}
+		},
+		{
+			"path": "pages/index/finance/finance",
+			"style": {
+				"navigationBarTitleText": "",
+				"app-plus": {
+					"enablePullDownRefresh": true,
+					"scrollIndicator": "none",
+					"bounce": "none",
+					"titleNView": {
+						"type": "default",
+						"autoBackButton": "false",
+						"buttons": [
+							{
+								"type": "none",
+								"float": "left",
+								"width": "15px"
+							},
+							{
+								"type": "none",
+								"fontSize": "20px",
+								"float": "left",
+								"width": "20px"
+							},
+							{
+								"text": "价格查询",
+								"fontSize": "18px",
+								"float": "left",
+								"width": "72px"
+							},
+							{
+								"type": "none",
+								"float": "right",
+								"width": "15px"
+							}
+						]
+					}
+				}
+			}
+		},
+		{
+			"path": "pages/statistic/finance/pricedetails",
+			"style": {
+				"navigationBarTitleText": "",
+				"app-plus": {
+					"enablePullDownRefresh": true,
+					"scrollIndicator": "none",
+					"bounce": "none",
+					"titleNView": {
+						"type": "default",
+						"autoBackButton": "false",
+						"buttons": [
+							{
+								"type": "none",
+								"float": "left",
+								"width": "15px"
+							},
+							{
+								"type": "back",
+								"fontSize": "20px",
+								"float": "left",
+								"width": "20px"
+							},
+							{
+								"text": "价格详情",
+								"fontSize": "18px",
+								"float": "left",
+								"width": "72px"
+							},
+							{
+								"type": "none",
+								"float": "right",
+								"width": "15px"
+							}
+						]
+					}
+				}
+			}
+		},
+		{
+			"path": "pages/statistic/home/homeDetails",
+			"style": {
+				"navigationBarTitleText": "",
+				"disableScroll": true,
+				"app-plus": {
+					"enablePullDownRefresh": false,
+					"scrollIndicator": "none",
+					"bounce": "none",
+					"titleNView": {
+						"type": "default",
+						"autoBackButton": "false",
+						"buttons": [
+							{
+								"type": "none",
+								"float": "left",
+								"width": "15px"
+							},
+							{
+								"type": "back",
+								"fontSize": "28px",
+								"float": "left",
+								"width": "35px"
+							},
+							{
+								"text": "首页详情",
+								"fontSize": "18px",
+								"float": "left",
+								"width": "75px"
+							}
+						]
+					}
+				}
+			}
+		},
+		{
+			"path": "pages/index/task/taskFinish",
+			"style": {
+				"navigationBarTitleText": "",
+				"disableScroll": true,
+				"app-plus": {
+					"enablePullDownRefresh": false,
+					"scrollIndicator": "none",
+					"bounce": "none",
+					"subNVues": [
+						{
+							"id": "finishToast",
+							"path": "components/finish-ok/finish-ok",
+							"type": "popup",
+							"style": {
+								"background": "transparent",
+								"zindex": 666
+							}
+						}
+					],
+					"titleNView": {
+						"type": "default",
+						"autoBackButton": "false",
+						"buttons": [
+							{
+								"type": "none",
+								"float": "left",
+								"width": "15px"
+							},
+							{
+								"type": "back",
+								"fontSize": "28px",
+								"float": "left",
+								"width": "35px"
+							},
+							{
+								"text": "提交完成",
+								"fontSize": "18px",
+								"float": "left",
+								"width": "75px"
+							}
+						]
+					}
+				}
+			}
+		},
+		{
+			"path": "pages/index/task/taskFeed",
+			"style": {
+				"navigationBarTitleText": "",
+				"app-plus": {
+					"enablePullDownRefresh": false,
+					"scrollIndicator": "none",
+					"bounce": "none",
+					"subNVues": [
+						{
+							"id": "sureToastIt",
+							"path": "components/bind-ok/bind-ok",
+							"type": "popup",
+							"style": {
+								"background": "transparent",
+								"zindex": 666
+							}
+						}
+					],
+					"titleNView": {
+						"type": "default",
+						"autoBackButton": "false",
+						"buttons": [
+							{
+								"type": "none",
+								"float": "left",
+								"width": "15px"
+							},
+							{
+								"type": "back",
+								"fontSize": "28px",
+								"float": "left",
+								"width": "35px"
+							},
+							{
+								"text": "评价任务",
+								"fontSize": "18px",
+								"float": "left",
+								"width": "75px"
+							}
+						]
+					}
+				}
+			}
+		},
+		{
+			"path": "pages/index/task/task",
+			"style": {
+				"navigationBarTitleText": "",
+				"app-plus": {
+					"enablePullDownRefresh": true,
+					"scrollIndicator": "none",
+					"bounce": "none",
+					"titleNView": {
+						"type": "default",
+						"autoBackButton": "false",
+						"buttons": [
+							{
+								"type": "none",
+								"float": "left",
+								"width": "15px"
+							},
+							{
+								"type": "none",
+								"fontSize": "20px",
+								"float": "left",
+								"width": "20px"
+							},
+							{
+								"text": "任务",
+								"fontSize": "18px",
+								"float": "left",
+								"width": "80px"
+							},
+							{
+								"type": "none",
+								"float": "right",
+								"width": "15px"
+							}
+						]
+					}
+				}
+			}
+		},
+		{
+			"path": "pages/index/task/taskDetail",
+			"style": {
+				"navigationBarTitleText": "",
+				"disableScroll": true,
+				"app-plus": {
+					"enablePullDownRefresh": true,
+					"scrollIndicator": "none",
+					"subNVues": [
+						{
+							"id": "showToast",
+							"path": "components/show-modal/show-modal",
+							"type": "popup",
+							"style": {
+								"background": "transparent",
+								"zindex": 666
+							}
+						},
+						{
+							"id": "sureToast",
+							"path": "components/bind-ok/bind-ok",
+							"type": "popup",
+							"style": {
+								"background": "transparent",
+								"zindex": 666
+							}
+						},
+						{
+							"id": "cancelOrder",
+							"path": "components/cancel-order/cancel-order",
+							"type": "popup",
+							"style": {
+								"background": "transparent",
+								"zindex": 666
+							}
+						}
+					],
+					"titleNView": {
+						"type": "default",
+						"autoBackButton": "false",
+						"buttons": [
+							{
+								"type": "none",
+								"float": "left",
+								"width": "15px"
+							},
+							{
+								"type": "back",
+								"fontSize": "28px",
+								"float": "left",
+								"width": "35px"
+							},
+							{
+								"text": "任务详情",
+								"fontSize": "18px",
+								"float": "left",
+								"width": "75px"
+							}
+						]
+					}
+				}
+			}
+		},
+		{
+			"path": "pages/login/login",
+			"style": {
+				"navigationStyle": "custom",
+				"app-plus": {
+					"scrollIndicator": "none"
+				}
+			}
+		},
+		{
+			"path": "pages/index/addAction/addAction",
+			"style": {
+				"navigationBarTitleText": "",
+				"disableScroll": true,
+				"app-plus": {
+					"enablePullDownRefresh": false,
+					"scrollIndicator": "none",
+					"bounce": "none",
+					"subNVues": [
+						{
+							"id": "publish",
+							"path": "components/addAction-publish/addAction-publish",
+							"type": "popup",
+							"style": {
+								"background": "transparent",
+								"zindex": 666
+							}
+						},
+						{
+							"id": "sureToast",
+							"path": "components/bind-ok/bind-ok",
+							"type": "popup",
+							"style": {
+								"background": "transparent",
+								"zindex": 666
+							}
+						}
+					],
+					"titleNView": {
+						"type": "default",
+						"autoBackButton": "false",
+						"buttons": [
+							{
+								"type": "none",
+								"float": "left",
+								"width": "15px"
+							},
+							{
+								"type": "back",
+								"fontSize": "28px",
+								"float": "left",
+								"width": "35px"
+							},
+							{
+								"text": "发布任务",
+								"fontSize": "18px",
+								"float": "left",
+								"width": "80px"
+							},
+							{
+								"type": "none",
+								"float": "right",
+								"width": "15px"
+							}
+						]
+					}
+				}
+			}
+		},
+		{
+			"path": "pages/statistic/mine/userInfo",
+			"style": {
+				"navigationBarTitleText": "",
+				"app-plus": {
+					"enablePullDownRefresh": false,
+					"scrollIndicator": "none",
+					"bounce": "none",
+					"titleNView": {
+						"type": "default",
+						"autoBackButton": "false",
+						"buttons": [
+							{
+								"type": "none",
+								"float": "left",
+								"width": "15px"
+							},
+							{
+								"type": "back",
+								"fontSize": "28px",
+								"float": "left",
+								"width": "35px"
+							},
+							{
+								"text": "个人信息",
+								"fontSize": "18px",
+								"float": "left",
+								"width": "80px"
+							},
+							{
+								"text": "保存",
+								"fontSize": "18px",
+								"float": "right",
+								"color": "#496DF5",
+								"width": "80px"
+							}
+						]
+					}
+				}
+			}
+		},
+		{
+			"path": "pages/statistic/mine/changeAccount",
+			"style": {
+				"navigationBarTitleText": "",
+				"app-plus": {
+					"enablePullDownRefresh": false,
+					"scrollIndicator": "none",
+					"bounce": "none",
+					"titleNView": {
+						"type": "default",
+						"autoBackButton": "false",
+						"buttons": [
+							{
+								"type": "none",
+								"float": "left",
+								"width": "15px"
+							},
+							{
+								"type": "back",
+								"fontSize": "28px",
+								"float": "left",
+								"width": "35px"
+							},
+							{
+								"text": "提现账号",
+								"fontSize": "18px",
+								"float": "left",
+								"width": "80px"
+							}
+						]
+					}
+				}
+			}
+		},
+		{
+			"path": "pages/statistic/mine/notice",
+			"style": {
+				"navigationBarTitleText": "",
+				"app-plus": {
+					"enablePullDownRefresh": true,
+					"scrollIndicator": "none",
+					"bounce": "none",
+					"titleNView": {
+						"type": "default",
+						"autoBackButton": "false",
+						"buttons": [
+							{
+								"type": "none",
+								"float": "left",
+								"width": "15px"
+							},
+							{
+								"type": "back",
+								"fontSize": "28px",
+								"float": "left",
+								"width": "35px"
+							},
+							{
+								"text": "消息提醒",
+								"fontSize": "18px",
+								"float": "left",
+								"width": "80px"
+							},
+							{
+								"type": "none",
+								"float": "right",
+								"width": "15px"
+							}
+						]
+					}
+				}
+			}
+		},
+		{
+			"path": "pages/statistic/mine/realName",
+			"style": {
+				"navigationBarTitleText": "",
+				"app-plus": {
+					"enablePullDownRefresh": false,
+					"scrollIndicator": "none",
+					"bounce": "none",
+					"subNVues": [
+						{
+							"id": "sureToast",
+							"path": "components/bind-ok/bind-ok",
+							"type": "popup",
+							"style": {
+								"background": "transparent",
+								"zindex": 666
+							}
+						}
+					],
+					"titleNView": {
+						"type": "default",
+						"autoBackButton": "false",
+						"buttons": [
+							{
+								"type": "none",
+								"float": "left",
+								"width": "15px"
+							},
+							{
+								"type": "back",
+								"fontSize": "28px",
+								"float": "left",
+								"width": "35px"
+							},
+							{
+								"text": "实名认证",
+								"fontSize": "18px",
+								"float": "left",
+								"width": "80px"
+							},
+							{
+								"type": "none",
+								"float": "right",
+								"width": "15px"
+							}
+						]
+					}
+				}
+			}
+		},
+		{
+			"path": "pages/statistic/mine/mineWallet",
+			"style": {
+				"navigationBarTitleText": "",
+				"app-plus": {
+					"enablePullDownRefresh": true,
+					"scrollIndicator": "none",
+					"bounce": "none",
+					"titleNView": {
+						"type": "default",
+						"autoBackButton": "false",
+						"buttons": [
+							{
+								"type": "none",
+								"float": "left",
+								"width": "15px"
+							},
+							{
+								"type": "back",
+								"fontSize": "28px",
+								"float": "left",
+								"width": "35px"
+							},
+							{
+								"text": "我的钱包",
+								"fontSize": "18px",
+								"float": "left",
+								"width": "80px"
+							},
+							{
+								"type": "none",
+								"float": "right",
+								"width": "15px"
+							}
+						]
+					}
+				}
+			}
+		},
+		{
+			"path": "pages/statistic/mine/aboutours",
+			"style": {
+				"navigationBarTitleText": "",
+				"app-plus": {
+					"enablePullDownRefresh": false,
+					"scrollIndicator": "none",
+					"bounce": "none",
+					"titleNView": {
+						"type": "default",
+						"autoBackButton": "false",
+						"buttons": [
+							{
+								"type": "none",
+								"float": "left",
+								"width": "15px"
+							},
+							{
+								"type": "back",
+								"fontSize": "28px",
+								"float": "left",
+								"width": "35px"
+							},
+							{
+								"text": "关于我们",
+								"fontSize": "18px",
+								"float": "left",
+								"width": "80px"
+							},
+							{
+								"type": "none",
+								"float": "right",
+								"width": "15px"
+							}
+						]
+					}
+				}
+			}
+		},
+		{
+			"path": "pages/statistic/mine/creditCenter",
+			"style": {
+				"navigationBarTitleText": "",
+				"app-plus": {
+					"enablePullDownRefresh": true,
+					"scrollIndicator": "none",
+					"bounce": "none",
+					"titleNView": {
+						"type": "default",
+						"autoBackButton": "false",
+						"buttons": [
+							{
+								"type": "none",
+								"float": "left",
+								"width": "15px"
+							},
+							{
+								"type": "back",
+								"fontSize": "28px",
+								"float": "left",
+								"width": "35px"
+							},
+							{
+								"text": "信用中心",
+								"fontSize": "18px",
+								"float": "left",
+								"width": "80px"
+							},
+							{
+								"type": "none",
+								"float": "right",
+								"width": "15px"
+							}
+						]
+					}
+				}
+			}
+		},
+		{
+			"path": "pages/index/mine/mine",
+			"style": {
+				"navigationBarTitleText": "",
+				"app-plus": {
+					"enablePullDownRefresh": false,
+					"scrollIndicator": "none",
+					"bounce": "none",
+					"subNVues": [
+						{
+							"id": "outlogin",
+							"path": "components/loginout/loginout",
+							"type": "popup",
+							"style": {
+								"background": "transparent",
+								"zindex": 666
+							}
+						},
+						{
+							"id": "tabToast",
+							"path": "components/tab-ok/tab-ok",
+							"type": "popup",
+							"style": {
+								"background": "transparent",
+								"zindex": 666
+							}
+						}
+					],
+					"titleNView": {
+						"type": "default",
+						"autoBackButton": "false",
+						"buttons": [
+							{
+								"type": "none",
+								"float": "left",
+								"width": "15px"
+							},
+							{
+								"type": "none",
+								"fontSize": "20px",
+								"float": "left",
+								"width": "20px"
+							},
+							{
+								"text": "我的",
+								"fontSize": "18px",
+								"float": "left",
+								"width": "80px"
+							},
+							{
+								"type": "none",
+								"float": "right",
+								"width": "15px"
+							}
+						]
+					}
+				}
+			}
+		},
+		{
+			"path": "pages/statistic/addAction/addAction",
+			"style": {
+				"navigationBarTitleText": "",
+				"disableScroll": true,
+				"app-plus": {
+					"enablePullDownRefresh": false,
+					"scrollIndicator": "none",
+					"bounce": "none",
+					"titleNView": {
+						"type": "default",
+						"autoBackButton": "false",
+						"buttons": [
+							{
+								"type": "none",
+								"float": "left",
+								"width": "15px"
+							},
+							{
+								"type": "back",
+								"fontSize": "28px",
+								"float": "left",
+								"width": "35px"
+							},
+							{
+								"text": "类目选择",
+								"fontSize": "18px",
+								"float": "left",
+								"width": "80px"
+							},
+							{
+								"type": "none",
+								"float": "right",
+								"width": "15px"
+							}
+						]
+					}
+				}
+			}
+		},
+		{
+			"path": "pages/statistic/mine/feedback",
+			"style": {
+				"navigationBarTitleText": "",
+				"backgroundColor": "#F6F6F6",
+				"app-plus": {
+					"enablePullDownRefresh": true,
+					"scrollIndicator": "none",
+					"bounce": "none",
+					"subNVues": [
+						{
+							"id": "sureToast",
+							"path": "components/bind-ok/bind-ok",
+							"type": "popup",
+							"style": {
+								"background": "transparent",
+								"zindex": 666
+							}
+						}
+					],
+					"titleNView": {
+						"type": "default",
+						"autoBackButton": "false",
+						"buttons": [
+							{
+								"type": "none",
+								"float": "left",
+								"width": "15px"
+							},
+							{
+								"type": "back",
+								"fontSize": "28px",
+								"float": "left",
+								"width": "35px"
+							},
+							{
+								"text": "意见反馈",
+								"fontSize": "18px",
+								"float": "left",
+								"width": "80px"
+							},
+							{
+								"type": "none",
+								"float": "right",
+								"width": "15px"
+							}
+						]
+					}
+				}
+			}
+		},
+		{
+			"path": "pages/statistic/mine/problem",
+			"style": {
+				"navigationBarTitleText": "",
+				"app-plus": {
+					"enablePullDownRefresh": false,
+					"scrollIndicator": "none",
+					"bounce": "none",
+					"titleNView": {
+						"type": "default",
+						"autoBackButton": "false",
+						"buttons": [
+							{
+								"type": "none",
+								"float": "left",
+								"width": "15px"
+							},
+							{
+								"type": "back",
+								"fontSize": "28px",
+								"float": "left",
+								"width": "35px"
+							},
+							{
+								"text": "常见问题",
+								"fontSize": "18px",
+								"float": "left",
+								"width": "80px"
+							},
+							{
+								"type": "none",
+								"float": "right",
+								"width": "15px"
+							}
+						]
+					}
+				}
+			}
+		},
+		{
+			"path": "pages/statistic/mine/interesting",
+			"style": {
+				"navigationBarTitleText": "",
+				"app-plus": {
+					"enablePullDownRefresh": true,
+					"scrollIndicator": "none",
+					"bounce": "none",
+					"titleNView": {
+						"type": "default",
+						"autoBackButton": "false",
+						"buttons": [
+							{
+								"type": "none",
+								"float": "left",
+								"width": "15px"
+							},
+							{
+								"type": "back",
+								"fontSize": "28px",
+								"float": "left",
+								"width": "35px"
+							},
+							{
+								"text": "兴趣行业",
+								"fontSize": "18px",
+								"float": "left",
+								"width": "80px"
+							},
+							{
+								"type": "none",
+								"float": "right",
+								"width": "15px"
+							}
+						]
+					}
+				}
+			}
+		},
+		{
+			"path": "pages/statistic/protocol/get",
+			"style": {
+				"navigationBarTitleText": "",
+				"app-plus": {
+					"enablePullDownRefresh": false,
+					"scrollIndicator": "none",
+					"bounce": "none",
+					"titleNView": {
+						"type": "default",
+						"autoBackButton": "false",
+						"buttons": [
+							{
+								"type": "none",
+								"float": "left",
+								"width": "15px"
+							},
+							{
+								"type": "back",
+								"fontSize": "28px",
+								"float": "left",
+								"width": "35px"
+							},
+							{
+								"text": "协议详情",
+								"fontSize": "18px",
+								"float": "left",
+								"width": "80px"
+							},
+							{
+								"type": "none",
+								"float": "right",
+								"width": "15px"
+							}
+						]
+					}
+				}
+			}
+		},
+		{
+			"path": "pages/statistic/protocol/publish",
+			"style": {
+				"navigationBarTitleText": "",
+				"app-plus": {
+					"enablePullDownRefresh": false,
+					"scrollIndicator": "none",
+					"bounce": "none",
+					"titleNView": {
+						"type": "default",
+						"autoBackButton": "false",
+						"buttons": [
+							{
+								"type": "none",
+								"float": "left",
+								"width": "15px"
+							},
+							{
+								"type": "back",
+								"fontSize": "28px",
+								"float": "left",
+								"width": "35px"
+							},
+							{
+								"text": "协议详情",
+								"fontSize": "18px",
+								"float": "left",
+								"width": "80px"
+							},
+							{
+								"type": "none",
+								"float": "right",
+								"width": "15px"
+							}
+						]
+					}
+				}
+			}
+		},
+		{
+			"path": "pages/statistic/protocol/realName",
+			"style": {
+				"navigationBarTitleText": "",
+				"app-plus": {
+					"enablePullDownRefresh": false,
+					"scrollIndicator": "none",
+					"bounce": "none",
+					"titleNView": {
+						"type": "default",
+						"autoBackButton": "false",
+						"buttons": [
+							{
+								"type": "none",
+								"float": "left",
+								"width": "15px"
+							},
+							{
+								"type": "back",
+								"fontSize": "28px",
+								"float": "left",
+								"width": "35px"
+							},
+							{
+								"text": "协议详情",
+								"fontSize": "18px",
+								"float": "left",
+								"width": "80px"
+							},
+							{
+								"type": "none",
+								"float": "right",
+								"width": "15px"
+							}
+						]
+					}
+				}
+			}
+		},
+		{
+			"path": "pages/statistic/protocol/privacy",
+			"style": {
+				"navigationBarTitleText": "",
+				"app-plus": {
+					"enablePullDownRefresh": false,
+					"scrollIndicator": "none",
+					"bounce": "none",
+					"titleNView": {
+						"type": "default",
+						"autoBackButton": "false",
+						"buttons": [
+							{
+								"type": "none",
+								"float": "left",
+								"width": "15px"
+							},
+							{
+								"type": "back",
+								"fontSize": "28px",
+								"float": "left",
+								"width": "35px"
+							},
+							{
+								"text": "协议详情",
+								"fontSize": "18px",
+								"float": "left",
+								"width": "80px"
+							},
+							{
+								"type": "none",
+								"float": "right",
+								"width": "15px"
+							}
+						]
+					}
+				}
+			}
+		},
+		{
+			"path": "pages/statistic/protocol/agree",
+			"style": {
+				"navigationBarTitleText": "",
+				"app-plus": {
+					"enablePullDownRefresh": false,
+					"scrollIndicator": "none",
+					"bounce": "none",
+					"titleNView": {
+						"type": "default",
+						"autoBackButton": "false",
+						"buttons": [
+							{
+								"type": "none",
+								"float": "left",
+								"width": "15px"
+							},
+							{
+								"type": "back",
+								"fontSize": "28px",
+								"float": "left",
+								"width": "35px"
+							},
+							{
+								"text": "用户协议",
+								"fontSize": "18px",
+								"float": "left",
+								"width": "80px"
+							},
+							{
+								"type": "none",
+								"float": "right",
+								"width": "15px"
+							}
+						]
+					}
+				}
+			}
+		},
+		{
+			"path": "pages/statistic/protocol/personal",
+			"style": {
+				"navigationBarTitleText": "",
+				"app-plus": {
+					"enablePullDownRefresh": false,
+					"scrollIndicator": "none",
+					"bounce": "none",
+					"titleNView": {
+						"type": "default",
+						"autoBackButton": "false",
+						"buttons": [
+							{
+								"type": "none",
+								"float": "left",
+								"width": "15px"
+							},
+							{
+								"type": "back",
+								"fontSize": "28px",
+								"float": "left",
+								"width": "35px"
+							},
+							{
+								"text": "隐私政策",
+								"fontSize": "18px",
+								"float": "left",
+								"width": "80px"
+							},
+							{
+								"type": "none",
+								"float": "right",
+								"width": "15px"
+							}
+						]
+					}
+				}
+			}
+		},
+		{
+			"path": "pages/statistic/protocol/vip",
+			"style": {
+				"navigationBarTitleText": "",
+				"app-plus": {
+					"enablePullDownRefresh": false,
+					"scrollIndicator": "none",
+					"bounce": "none",
+					"titleNView": {
+						"type": "default",
+						"autoBackButton": "false",
+						"buttons": [
+							{
+								"type": "none",
+								"float": "left",
+								"width": "15px"
+							},
+							{
+								"type": "back",
+								"fontSize": "28px",
+								"float": "left",
+								"width": "35px"
+							},
+							{
+								"text": "协议详情",
+								"fontSize": "18px",
+								"float": "left",
+								"width": "80px"
+							},
+							{
+								"type": "none",
+								"float": "right",
+								"width": "15px"
+							}
+						]
+					}
+				}
+			}
+		},
+		{
+			"path": "pages/statistic/mine/vipAuth",
+			"style": {
+				"disableScroll": true,
+				"app-plus": {
+					"subNVues": [
+						{
+							"id": "publish",
+							"path": "components/addAction-publish/addAction-publish",
+							"type": "popup",
+							"style": {
+								"background": "transparent",
+								"zindex": 666
+							}
+						},
+						{
+							"id": "sureToast",
+							"path": "components/bind-ok/bind-ok",
+							"type": "popup",
+							"style": {
+								"background": "transparent",
+								"zindex": 667
+							}
+						}
+					],
+					"titleNView": false
+				}
+			}
+		},
+		{
+			"path": "pages/statistic/mine/withdrawal",
+			"style": {
+				"navigationBarTitleText": "",
+				"app-plus": {
+					"enablePullDownRefresh": true,
+					"scrollIndicator": "none",
+					"bounce": "none",
+					"subNVues": [
+						{
+							"id": "withDraw",
+							"path": "components/widthDraw/withDraw",
+							"type": "popup",
+							"style": {
+								"background": "transparent",
+								"zindex": 666
+							}
+						},
+						{
+							"id": "sureToast",
+							"path": "components/bind-ok/bind-ok",
+							"type": "popup",
+							"style": {
+								"background": "transparent",
+								"zindex": 667
+							}
+						}
+					],
+					"titleNView": {
+						"type": "default",
+						"autoBackButton": "false",
+						"buttons": [
+							{
+								"type": "none",
+								"float": "left",
+								"width": "15px"
+							},
+							{
+								"type": "back",
+								"fontSize": "28px",
+								"float": "left",
+								"width": "35px"
+							},
+							{
+								"text": "提现",
+								"fontSize": "18px",
+								"float": "left",
+								"width": "80px"
+							},
+							{
+								"type": "none",
+								"float": "right",
+								"width": "15px"
+							}
+						]
+					}
+				}
+			}
+		},
+		{
+			"path": "pages/statistic/mine/bindAli",
+			"style": {
+				"navigationBarTitleText": "",
+				"app-plus": {
+					"enablePullDownRefresh": true,
+					"scrollIndicator": "none",
+					"bounce": "none",
+					"subNVues": [
+						{
+							"id": "sureToast",
+							"path": "components/bind-ok/bind-ok",
+							"type": "popup",
+							"style": {
+								"background": "transparent",
+								"zindex": 666
+							}
+						}
+					],
+					"titleNView": {
+						"type": "default",
+						"autoBackButton": "false",
+						"buttons": [
+							{
+								"type": "none",
+								"float": "left",
+								"width": "15px"
+							},
+							{
+								"type": "back",
+								"fontSize": "28px",
+								"float": "left",
+								"width": "35px"
+							},
+							{
+								"text": "绑定支付宝",
+								"fontSize": "18px",
+								"float": "left",
+								"width": "100px"
+							},
+							{
+								"type": "none",
+								"float": "right",
+								"width": "15px"
+							}
+						]
+					}
+				}
+			}
+		},
+		{
+			"path": "pages/statistic/mine/bindBank",
+			"style": {
+				"navigationBarTitleText": "",
+				"app-plus": {
+					"enablePullDownRefresh": true,
+					"scrollIndicator": "none",
+					"bounce": "none",
+					"subNVues": [
+						{
+							"id": "sureToastB",
+							"path": "components/bind-ok1/bind-ok",
+							"type": "popup",
+							"style": {
+								"background": "transparent",
+								"zindex": 666
+							}
+						}
+					],
+					"titleNView": {
+						"type": "default",
+						"autoBackButton": "false",
+						"buttons": [
+							{
+								"type": "none",
+								"float": "left",
+								"width": "15px"
+							},
+							{
+								"type": "back",
+								"fontSize": "28px",
+								"float": "left",
+								"width": "35px"
+							},
+							{
+								"text": "绑定银行卡",
+								"fontSize": "18px",
+								"float": "left",
+								"width": "100px"
+							},
+							{
+								"type": "none",
+								"float": "right",
+								"width": "15px"
+							}
+						]
+					}
+				}
+			}
+		}
+	],
+	"tabBar": {
+		"color": "#7A7E83",
+		"selectedColor": "#007AFF",
+		"borderStyle": "white",
+		"backgroundColor": "#FFFFFF",
+		"height": "50px",
+		"midButton": {
+			"height": "75px",
+			"text": "发布",
+			"iconPath": "static/fbbtn.png",
+			"iconWidth": "52px"
+		},
+		"list": [
+			{
+				"pagePath": "pages/index/home/home",
+				"iconPath": "static/home.png",
+				"selectedIconPath": "static/sy.png",
+				"text": "首页"
+			},
+			{
+				"pagePath": "pages/index/finance/finance",
+				"iconPath": "static/jiage.png",
+				"selectedIconPath": "static/jg.png",
+				"text": "价格"
+			},
+			{
+				"pagePath": "pages/index/task/task",
+				"iconPath": "static/renwu.png",
+				"selectedIconPath": "static/rw.png",
+				"text": "任务"
+			},
+			{
+				"pagePath": "pages/index/mine/mine",
+				"iconPath": "static/me.png",
+				"selectedIconPath": "static/wd.png",
+				"text": "我的"
+			}
+		]
+	},
+	"globalStyle": {
+		"navigationBarTextStyle": "black",
+		"navigationBarTitleText": "uni-app",
+		"navigationBarBackgroundColor": "#ffffff",
+		"backgroundColor": "#F9F9F9",
+		"animationType": "slide-in-right"
+	},
+	"condition": {
+		"current": 0,
+		"list": [
+			{
+				"name": "",
+				"path": "",
+				"query": ""
+			}
+		]
+	}
+}

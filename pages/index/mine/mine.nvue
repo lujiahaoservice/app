@@ -1,0 +1,376 @@
+<template>
+	<div class="mine">
+		<div class="mine_my_card" @click="goPage(1)">
+			<div class="mine_card_left">
+				<div class="mine_photo">
+					<image class="mine_image" :src="userInfo.photo" alt="头像" />
+				</div>
+				<div class="mine_info">
+					<text class="mine_name">{{userInfo.nickname}}</text>
+					<text class="mine_mobile">{{userInfo.mobile}}</text>
+				</div>
+			</div>
+			<div class="mine_card_right">
+				<image class="mine_imageR" src="../../../static/mineImg/mine_photo_details.png" alt="详情" />
+			</div>
+		</div>
+		<div class="mine_list">
+			<div class="mine_line" @click="goPage(2)">
+				<div class="mine_line_left">
+					<div class="mine_line_img">
+						<image class="mine_line_image" src="../../../static/mineImg/mine_notice.png" />
+					</div>
+					<text class="mine_line_title">消息提醒</text>
+				</div>
+				<div class="mine_line_more">
+					<text class="right_msg"></text>
+					<image class="mine_line_moreImg" src="../../../static/mineImg/mine_details.png" alt="更多" />
+				</div>
+			</div>
+			<div class="mine_line" @click="goPage(3)">
+				<div class="mine_line_left">
+					<div class="mine_line_img">
+						<image class="mine_line_image" src="../../../static/mineImg/real_name.png" alt="实名认证" />
+					</div>
+					<text class="mine_line_title">实名认证</text>
+				</div>
+				<div class="mine_line_more">
+					<text class="right_msg">{{userInfo.verifiedStatus == 0 ? '未认证' : (userInfo.verifiedStatus == 1 ? '审核中' : (userInfo.verifiedStatus == 2 ? '已认证' : '未通过'))}}</text>
+					<image class="mine_line_moreImg" src="../../../static/mineImg/mine_details.png" alt="更多" />
+				</div>
+			</div>
+			<div class="mine_line" @click="goPage(4)">
+				<div class="mine_line_left">
+					<div class="mine_line_img">
+						<image class="mine_line_image" src="../../../static/mineImg/mine_vip.png" alt="会员认证" />
+					</div>
+					<text class="mine_line_title">会员认证</text>
+					<text class="left_msg" v-if="userInfo.memberExtime">{{userInfo.memberExtime}}到期</text>
+				</div>
+				<div class="mine_line_more">
+					<text class="right_msg"  v-if="!userInfo.memberExtime">未开通</text>
+					<text class="right_msg"  v-if="userInfo.memberExtime">{{userInfo.feeConfigureId == 0 ? '未开通' : '已开通'}}</text>
+					<image class="mine_line_moreImg" src="../../../static/mineImg/mine_details.png" alt="更多" />
+				</div>
+			</div>
+			<div class="mine_line" @click="goPage(5)">
+				<div class="mine_line_left">
+					<div class="mine_line_img">
+						<image class="mine_line_image" src="../../../static/mineImg/mine_wallet.png" alt="我的钱包" />
+					</div>
+					<text class="mine_line_title">我的钱包</text>
+				</div>
+				<div class="mine_line_more">
+					<text class="right_msg"></text>
+					<image class="mine_line_moreImg" src="../../../static/mineImg/mine_details.png" alt="更多" />
+				</div>
+			</div>
+			<div class="mine_line" @click="goPage(6)">
+				<div class="mine_line_left">
+					<div class="mine_line_img">
+						<image class="mine_line_image" src="../../../static/mineImg/xyzx@2x.png" alt="信用中心" />
+					</div>
+					<text class="mine_line_title">信用中心</text>
+					<text class="left_msg">信用分：{{userInfo.credit}}分</text>
+				</div>
+				<div class="mine_line_more">
+					<text class="right_msg"></text>
+					<image class="mine_line_moreImg" src="../../../static/mineImg/mine_details.png" alt="更多" />
+				</div>
+			</div>
+			<div class="mine_line" @click="goPage(7)">
+				<div class="mine_line_left">
+					<div class="mine_line_img">
+						<image class="mine_line_image" src="../../../static/mineImg/cjwt.png" alt="常见问题" />
+					</div>
+					<text class="mine_line_title">常见问题</text>
+				</div>
+				<div class="mine_line_more">
+					<text class="right_msg"></text>
+					<image class="mine_line_moreImg" src="../../../static/mineImg/mine_details.png" alt="更多" />
+				</div>
+			</div>
+			<div class="mine_line" @click="goPage(8)">
+				<div class="mine_line_left">
+					<div class="mine_line_img">
+						<image class="mine_line_image" src="../../../static/mineImg/yjfk.png" alt="意见反馈" />
+					</div>
+					<text class="mine_line_title">意见反馈</text>
+				</div>
+				<div class="mine_line_more">
+					<text class="right_msg"></text>
+					<image class="mine_line_moreImg" src="../../../static/mineImg/mine_details.png" alt="更多" />
+				</div>
+			</div>
+			
+			<div class="mine_line" @click="goPage(11)">
+				<div class="mine_line_left">
+					<div class="mine_line_img">
+						<image class="mine_line_image" src="../../../static/mineImg/cjwt.png" alt="用户协议及隐私政策" />
+					</div>
+					<text class="mine_line_title">用户协议及隐私政策</text>
+				</div>
+				<div class="mine_line_more">
+					<text class="right_msg"></text>
+					<image class="mine_line_moreImg" src="../../../static/mineImg/mine_details.png" alt="更多" />
+				</div>
+			</div>
+			<div class="mine_line" @click="goPage(9)">
+				<div class="mine_line_left">
+					<div class="mine_line_img">
+						<image class="mine_line_image" src="../../../static/mineImg/about.png" alt="关于我们" />
+					</div>
+					<text class="mine_line_title">关于我们</text>
+				</div>
+				<div class="mine_line_more">
+					<text class="right_msg"></text>
+					<image class="mine_line_moreImg" src="../../../static/mineImg/mine_details.png" alt="更多" />
+				</div>
+			</div>
+			<div class="mine_line" @click="goPage(10)">
+				<div class="mine_line_left">
+					<div class="mine_line_img">
+						<image class="mine_line_image" src="../../../static/mineImg/off.png" alt="退出登录" />
+					</div>
+					<text class="mine_line_title">退出登录</text>
+				</div>
+				<div class="mine_line_more">
+					<text class="right_msg"></text>
+					<image class="mine_line_moreImg" src="../../../static/mineImg/mine_details.png" alt="更多" />
+				</div>
+			</div>
+		</div>
+	</div>
+</template>
+
+<script>
+	import http from '@/utils/request'
+	export default {
+		data() {
+			return {
+				title: 'Hello',
+				userInfo: {}
+			}
+		},
+		onLoad() {
+			
+		},
+		onShow() {
+			this.initData()
+		},
+		onHide() {
+
+		},
+		methods: {
+			initData() {
+				let that = this
+				http('get', 'clientUser/detail', {}, res => {
+					if(res.code == 200) {
+						that.userInfo = res.data
+					}
+				})
+			},
+			goPage(type) {
+				let that = this
+				const msg = JSON.stringify(that.userInfo)
+						const subNVueSure = uni.getSubNVueById('outlogin')
+						const subNVueTab = uni.getSubNVueById('tabToast')
+				switch (type) {
+					case 1:
+						uni.navigateTo({
+							url: `/pages/statistic/mine/userInfo`
+						})
+						break;
+					case 2:
+						uni.navigateTo({
+							url: '/pages/statistic/mine/notice'
+						})
+						break;
+					case 3:
+						if(that.userInfo.verifiedStatus == 1 || that.userInfo.verifiedStatus == 2) {
+							let content = ''
+							if(that.userInfo.verifiedStatus == 1){
+								content='实名认证正在审核中'
+							}
+							if(that.userInfo.verifiedStatus == 2){
+								content='实名认证已通过请勿重复提交'
+							}
+							
+							uni.$emit('tab-ok',{
+								content: content
+							})
+							// 打开 nvue 子窗体  
+							subNVueTab.show('slide-in-bottom', 300, function () {
+								// 打开后进行一些操作...  
+								//   
+							})
+							
+							// subNVueTab.postMessage({
+							// 	content: content
+							// })
+							return
+						}
+						uni.navigateTo({
+							url: '/pages/statistic/mine/realName'
+						})
+						break;
+					case 4:
+						uni.navigateTo({
+							url: '/pages/statistic/mine/vipAuth'
+						})
+						break;
+					case 5:
+						uni.navigateTo({
+							url: `/pages/statistic/mine/mineWallet?msg=${msg}`
+						})
+						break;
+					case 6:
+						uni.navigateTo({
+							url: `/pages/statistic/mine/creditCenter?msg=${msg}`
+						})
+						break;
+					case 7:
+						uni.navigateTo({
+							url: '/pages/statistic/mine/problem'
+						})
+						break;
+					case 8:
+						uni.navigateTo({
+							url: '/pages/statistic/mine/feedback'
+						})
+						break;
+					case 9:
+						uni.navigateTo({
+							url: '/pages/statistic/mine/aboutours'
+						})
+						break;
+					case 11:
+						uni.navigateTo({
+							url: '/pages/statistic/protocol/privacy'
+						})
+						break;
+					case 10:
+						// 打开 nvue 子窗体  
+						subNVueSure.show('slide-in-bottom', 300, function () {
+							// 打开后进行一些操作...  
+							//   
+						})
+						break;
+				}
+			},
+		}
+	}
+</script>
+
+<style scoped>
+	.mine {
+		font-size: 28rpx;
+	}
+
+	.mine_my_card {
+		flex-direction: row;
+		height: 198rpx;
+		background-color: rgba(73, 109, 245, 1);
+		justify-content: space-between;
+		padding: 0 30rpx 0 62rpx;
+		align-items: center;
+	}
+
+	.mine_card_left {
+		flex-direction: row;
+		justify-content: flex-start;
+		align-items: center;
+	}
+
+	.mine_image {
+		border-radius: 50%;
+		border-width: 1px;
+		border-style: solid;
+		border-color: #fff;
+		height: 120rpx;
+		width: 120rpx;
+	}
+
+	.mine_info {
+		justify-content: center;
+		margin-left: 20px;
+	}
+
+	.mine_name {
+		font-size: 14px;
+		font-weight: 500;
+		margin-bottom: 5px;
+		color: rgba(255, 255, 255, 1);
+	}
+
+	.mine_mobile {
+		font-size: 14px;
+		font-weight: 500;
+		color: rgba(255, 255, 255, 1);
+	}
+
+	.mine_imageR {
+		width: 16px;
+		height: 16px;
+	}
+
+	.mine_line_image {
+		width: 16px;
+		height: 16px;
+	}
+
+	.mine_list {
+		padding: 40rpx 20rpx 0 22rpx;
+	}
+
+	.mine_line {
+		flex-direction: row;
+		border-bottom-width: 1px;
+		border-bottom-style: solid;
+		border-bottom-color: #DCDCDC;
+		padding: 30rpx 0 20rpx;
+		justify-content: space-between;
+		align-items: center;
+	}
+
+	.mine_line_left {
+		flex-direction: row;
+		align-items: center;
+	}
+
+	.mine_line_img {
+		margin-right: 9px;
+	}
+
+	.mine_line_title {
+		font-size: 34rpx;
+		font-weight: 400;
+		color: rgba(0, 0, 0, 1);
+		line-height: 20px;
+	}
+
+	.mine_line_more {
+		height: 40rpx;
+		width: 150rpx;
+		flex-direction: row;
+	}
+
+	.mine_line_moreImg {
+		height: 36rpx;
+		width: 30rpx;
+	}
+	.right_msg{
+		font-size:14px;
+		font-weight:400;
+		line-height: 20px;
+		color:rgba(187,187,187,1);
+		margin-right: 3px;
+		width: 56px;
+	}
+	.left_msg{
+		margin-left: 15px;
+		font-size:10px;
+		font-weight:400;
+		color:rgba(102,102,102,1);
+	}
+</style>

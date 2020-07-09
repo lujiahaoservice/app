@@ -1,0 +1,170 @@
+<template>
+  <div class="jucontent">
+    <div></div>
+    <div class="withdrawal_way">
+      <text class="withdrawal_title">提现方式</text>
+      <div class="way_list">
+        <div class="way_single" :style="way===0?'border-color:#496DF5':'border-color:#DCDCDC;'" @click="choiceWay(0)">
+          <image src="/static/mineImg/payAli.png" alt="支付宝" class="way_img">
+            <text class="way_text">{{alipay ? '支付宝' : '绑定支付宝'}}</text>
+        </div>
+        <div class="way_single" :style="way===1?'border-color:#496DF5':'border-color:#DCDCDC;'" @click="choiceWay(1)">
+          <image src="/static/mineImg/payBank.png" alt="银行卡" class="way_img">
+            <text class="way_text">{{bankCard ? '银行卡' : '绑定银行卡'}}</text>
+        </div>
+        <div class="way_single" :style="way===2?'border-color:#496DF5':'border-color:#DCDCDC;'" @click="">
+          <image src="/static/mineImg/payWeixin.png" alt="微信" class="way_img">
+            <text class="way_text">微信暂未开通</text>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+  import http from '@/utils/request'
+  export default {
+    data() {
+      return {
+        way: 0,
+        alipay: '',
+        alipayUsername: '',
+        bankUsername: '',
+        bankCard: '',
+        money: ''
+      }
+    },
+    onLoad() {
+      const subNVue = uni.getCurrentSubNVue();
+      // subNVue 子窗体监听 vue 页面传递的消息  
+      subNVue.onMessage((res) => {
+        const data = res.data;
+        this.alipay = data.alipay
+        this.alipayUsername = data.alipayUsername
+        this.bankUsername = data.bankUsername
+        this.bankCard = data.bankCard,
+          this.money = data.money
+      });
+    },
+    methods: {
+      // 选择绑定方式
+      choiceWay(type) {
+        this.way = type
+        const subNVue = uni.getSubNVueById('withDraw')
+        if ((!this.alipay && type == 0) || (!this.bankCard && type == 1)) {
+          switch (type) {
+            case 0:
+              // 关闭 nvue 子窗体  
+              subNVue.hide('slide-out-bottom', 300)
+              uni.navigateTo({
+                url: '/pages/statistic/mine/bindAli'
+              })
+              break;
+            case 1:
+              // 关闭 nvue 子窗体  
+              subNVue.hide('slide-out-bottom', 300)
+              uni.navigateTo({
+                url: '/pages/statistic/mine/bindBank'
+              })
+              break;
+          }
+        } else {
+          let data = {
+            alipayAccount: this.alipay,
+            amount: this.money,
+            bankCard: this.bankCard,
+            cashMethod: this.way
+          }
+          http('post', 'clientUser/withdraw', data, res => {
+            if (res.code == 200) {
+              subNVue.hide('slide-out-bottom', 300)
+              subNVue.postMessage({
+                content: '申请提现成功',
+                success: 1
+              })
+            }
+          })
+        }
+      }
+    }
+  }
+</script>
+
+<style scoped>
+  .jucontent{
+    flex: 1;
+    justify-content: space-between;
+  }
+  /*遮罩层 */
+  .withdrawal_way {
+    height: 260px;
+    z-index: 666;
+    background-color: #fff;
+    padding: 0 22rpx;
+  }
+
+  .withdrawal_title {
+    border-bottom-width: 1px;
+    border-bottom-style: solid;
+    border-bottom-color: #DCDCDC;
+    font-size: 16px;
+    height: 80rpx;
+    font-weight: 400;
+    color: rgba(51, 51, 51, 1);
+    line-height: 80rpx;
+  }
+
+  .way_list {
+    justify-content: space-between;
+    flex-wrap: wrap;
+    flex-direction: row;
+  }
+
+  .way_single {
+    margin-top: 10px;
+    padding-left: 20px;
+    height: 48px;
+    border-width: 1px;
+    border-style: solid;
+    width: 160px;
+    flex-direction: row;
+    align-items: center;
+    border-radius: 8px;
+  }
+
+  .way_img {
+    height: 28px;
+    width: 28px;
+  }
+
+  .way_text {
+    font-size: 14px !important;
+    margin-left: 10px;
+    font-weight: 400;
+    color: rgba(51, 51, 51, 1);
+  }
+
+  /* 立即支付按钮 */
+  .pay_btn_box {
+    margin-top: 100px;
+    flex-direction: row;
+    justify-content: center;
+  }
+
+  .pay_btn_btn {
+    width: 128px;
+    height: 42px;
+    background-color: rgba(73, 109, 245, 1);
+    border-radius: 8px;
+  }
+
+  .pay_btn_text {
+    width: 128px;
+    text-align: center;
+    height: 42px;
+    font-size: 16px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 1);
+    line-height: 42px;
+  }
+</style>

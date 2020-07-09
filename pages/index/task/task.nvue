@@ -1,0 +1,366 @@
+<template>
+	<div class="task_box">
+		<!-- tabs -->
+		<div class="task_tab_all">
+			<div class="task_tab1">
+				<text @click="switch_tab1_active(1)" class="order_task" :class="{tab1_active:tab1_active === 1}">接单任务</text>
+				<text @click="switch_tab1_active(2)" class="release_task" :class="{tab1_active:tab1_active === 2}">我发布的</text>
+			</div>
+			<div class="task_tab2">
+				<text @click="switch_tab2_active(0)" class="task_all" :class="{tab1_active:tab2_active === 0}">全部</text>
+				<text @click="switch_tab2_active(3)" class="task_getOn" :class="{tab2_active:tab2_active === 3}">进行中</text>
+				<text @click="switch_tab2_active(4)" class="task_pending" :class="{tab2_active:tab2_active === 4}">待验收</text>
+				<text @click="switch_tab2_active(5)" class="task_finsh" :class="{tab2_active:tab2_active === 5}">已完成</text>
+				<text @click="switch_tab2_active(6)" class="task_deal" :class="{tab2_active:tab2_active === 6}">处理中</text>
+				<text @click="switch_tab2_active(7)" class="task_cancel" :class="{tab2_active:tab2_active === 7}">已取消</text>
+			</div>
+		</div>
+		<div style="flex: 1;padding: 0 10px;">
+			<scroll-view show-scrollbar=false scroll-y=true class="task_list" lower-threshold=50 :scroll-top="scrollTop"
+				@scroll="scroll" @scrolltolower="reachBottom">
+				<div style="margin-bottom: 30px;">
+					<div class="task_item" @click="goTaskDetail(item.taskId, item.status, index)" v-for="(item, index) in mineTaskList"
+						:key="index">
+						<div class="task_item_top">
+							<text class="task_adress">{{item.province+item.city+item.district}}</text>
+							<text class="task_bounty">任务赏金：{{(item.money / 100).toFixed(2)}}元</text>
+						</div>
+						<div class="task_item_bot">
+							<div class="task_item_bot_left">
+								<text class="task_name"
+									:style="{'background-color':colorChange(item.pcategoryName)}">{{item.categoryName}}</text>
+								<div class="task_status_box">
+									<text
+										class="task_status">{{item.status == 0 ? '审核中' : (item.status == 1 ? '待接单' : (item.status == 2 ? '不通过' : (item.status == 3 ? '进行中' : (item.status == 4 ? '待验收' : (item.status == 5 ? '已完成' : (item.status == 6 ? '处理中' : (item.status == 7 ? '已取消' : (item.status == 8 ? '取消审核失败' : '已完成'))))))))}}</text>
+								</div>
+							</div>
+							<div class="task_item_bot_right">
+								<div class="flexItLock">
+									<text class="task_tit">{{item.title}}</text>
+									<text class="sortLock">{{item.taskLock == 1 ? '已锁定' : ' '}}</text>
+								</div>
+								<text style="lines: 2;text-overflow: ellipsis" class="task_desc">{{item.detail}}</text>
+							</div>
+						</div>
+					</div>
+				</div>
+			</scroll-view>
+		</div>
+	</div>
+</template>
+
+<script>
+	import http from '@/utils/request'
+	import { mapState } from 'vuex'
+	export default {
+		data() {
+			return {
+				tab1_active: 1,
+				tab2_active: 0,
+				pageNum: 1,
+				pageSize: 10,
+				pages: 0,
+				taskList: [],
+				mineTaskList: [],
+				scrollTop: 0,
+				old: {
+					scrollTop: 0
+				}
+			}
+		},
+		computed: {
+			...mapState(['deleteOne'])
+		},
+		watch: {
+			tab1_active() {
+				this.pageNum = 1
+				this.initData(false)
+			},
+			tab2_active() {
+				this.pageNum = 1
+				this.initData(false)
+			},
+			deleteOne(val) {
+				this.taskList.splice(val, 1)
+			}
+		},
+		onLoad() {
+			let that = this
+		},
+		onShow() {
+			let that = this
+			this.pageNum = 1
+			this.scrollTop = this.old.scrollTop
+			this.$nextTick(function () {
+				this.scrollTop = 0
+			});
+			this.initData(false)
+		},
+		methods: {
+			scroll: function (e) {
+				this.old.scrollTop = e.detail.scrollTop
+			},
+			// 接单任务列表
+			initData(e) {
+				let that = this
+				let url = this.tab1_active == 1 ? 'task/myReleaseList' : 'task/releaseList'
+				const data = {
+					pageNum: this.pageNum,
+					pageSize: this.pageSize,
+					status: this.tab2_active
+				}
+				if (data.status == 0) {
+					delete data.status
+				}
+				http('get', url, data, res => {
+					let msg = res.data.records
+					if (res.code == 200) {
+						if (that.tab1_active == 1) {
+							if (e) {
+								let newList = that.mineTaskList.concat(msg)
+								that.mineTaskList = newList
+							} else {
+								that.mineTaskList = msg
+							}
+						} else {
+							if (e) {
+								let newList = that.mineTaskList.concat(msg)
+								that.mineTaskList = newList
+							} else {
+								that.mineTaskList = msg
+							}
+						}
+					}
+					that.pages = res.data.pages
+				})
+			},
+			switch_tab1_active(type) {
+				this.tab1_active = type
+			},
+			switch_tab2_active(type) {
+				this.tab2_active = type
+			},
+			goTaskDetail(id, status, index) {
+				if (status == 2) {
+					uni.navigateTo({
+						url: `/pages/index/addAction/addAction?id=${id}`
+					})
+					return
+				}
+				const url = `/pages/index/task/taskDetail?id=${id}&from=${this.tab1_active}&clickIndex=${index}`
+				uni.navigateTo({
+					url
+				})
+			},
+			colorChange(e) {
+				if (e === '线上任务') {
+					return 'rgba(245,216,73,1)'
+				} else if (e === '线下任务') {
+					return 'rgba(245,134,73,1)'
+				} else if (e === '跑腿任务') {
+					return 'rgba(73,225,245,1)'
+				}
+			},
+			reachBottom() {
+				if (this.pageNum < this.pages) {
+					this.pageNum += 1
+					this.initData(true)
+				}
+			}
+		},
+		onBackPress() {
+			this.pageNum = 1
+			this.initData(false)
+		},
+		onPullDownRefresh() {
+			this.pageNum = 1
+			this.initData(false)
+			uni.stopPullDownRefresh();
+		}
+	}
+</script>
+
+<style scoped>
+	.task_box {
+		background-color: #F6F6F6;
+		flex: 1;
+	}
+
+	.task_tab_all {
+		height: 89px;
+		background-color: #fff;
+	}
+
+	.task_tab1 {
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		height: 50px;
+		border-top-width: 1px;
+		border-top-style: solid;
+		border-top-color: #F3F3F3;
+	}
+
+	.order_task {
+		margin-right: 30px;
+		font-size: 14px;
+		height: 30px;
+		line-height: 30px;
+		font-weight: 400;
+		color: rgba(0, 0, 0, 1);
+	}
+
+	.release_task {
+		margin-left: 30px;
+		font-size: 14px;
+		height: 30px;
+		line-height: 30px;
+		font-weight: 400;
+		color: rgba(0, 0, 0, .8);
+	}
+
+	.tab1_active {
+		font-weight: 600;
+		color: rgba(0, 0, 0, 1);
+		border-bottom-width: 2px;
+		border-bottom-style: solid;
+		border-bottom-color: rgba(73, 109, 245, 1);
+	}
+
+	.task_tab2 {
+		flex: 1;
+		padding-left: 10px;
+		padding-right: 10px;
+		flex-direction: row;
+		align-items: center;
+		justify-content: space-between;
+	}
+
+	.task_all,
+	.task_getOn,
+	.task_pending,
+	.task_finsh,
+	.task_deal,
+	.task_cancel {
+		text-align: center;
+		font-size: 12px;
+		font-weight: 400;
+		height: 30px;
+		line-height: 30px;
+		color: rgba(0, 0, 0, .8);
+	}
+
+	.tab2_active {
+		font-weight: 600;
+		color: rgba(0, 0, 0, 1);
+		border-bottom-width: 2px;
+		border-bottom-style: solid;
+		border-bottom-color: rgba(73, 109, 245, 1);
+	}
+
+	.task_list {
+		flex: 1;
+		align-items: center;
+	}
+
+	.task_item {
+		height: 99px;
+		background-color: rgba(255, 255, 255, 1);
+		/* box-shadow: 0px 2px 4px 0px rgba(220, 225, 244, 0.6); */
+		border-radius: 8px;
+		padding-left: 6px;
+		padding-right: 9px;
+		margin-top: 10px;
+	}
+
+	.task_item_top {
+		height: 25px;
+		border-bottom-width: 1px;
+		border-bottom-style: solid;
+		border-bottom-color: #F3F3F3;
+		flex-direction: row;
+		align-items: center;
+		justify-content: space-between;
+		padding-left: 4px;
+	}
+
+	.task_adress {
+		font-size: 10px;
+		font-weight: 400;
+		color: rgba(0, 0, 0, 1);
+	}
+
+	.task_bounty {
+		font-size: 10px;
+		font-weight: 400;
+		color: rgba(214, 10, 10, 1);
+	}
+
+	.task_item_bot {
+		flex: 1;
+		flex-direction: row;
+		padding-left: 4px;
+		padding-top: 9;
+		padding-bottom: 10px;
+	}
+
+	.task_item_bot_left {
+		width: 66px;
+		align-items: center;
+		margin-right: 13px;
+	}
+
+	.task_name {
+		width: 66px;
+		height: 28px;
+		background-color: rgba(245, 216, 73, 1);
+		border-radius: 8px;
+		font-size: 10px;
+		color: rgba(0, 0, 0, 1);
+		text-align: center;
+		line-height: 28px;
+		margin-bottom: 6px;
+	}
+
+	.task_status {
+		font-size: 10px;
+		color: rgba(0, 0, 0, 1);
+	}
+
+	.task_item_bot_right {
+		flex: 1;
+	}
+
+	.task_tit {
+		font-size: 14px;
+		font-weight: 400;
+		color: rgba(0, 0, 0, 1);
+		margin-bottom: 3px;
+	}
+
+	.flexItLock {
+		flex-direction: row;
+		justify-content: space-between;
+		align-items: center;
+	}
+
+	.sortLock {
+		height: 56rpx;
+		border-radius: 8px;
+		align-items: center;
+		justify-content: center;
+		font-size: 10px;
+		font-weight: 400;
+		color: rgba(214, 10, 10, 1);
+		text-align: center;
+		line-height: 56rpx;
+	}
+
+	.task_desc {
+		width: 275px;
+		font-size: 10px;
+		font-weight: 400;
+		color: rgba(0, 0, 0, 1);
+		line-height: 14px;
+	}
+</style>

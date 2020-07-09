@@ -1,0 +1,170 @@
+<template>
+  <div class="taskFinish">
+    <div>
+      <textarea class="textA" confirm-type="done" v-model="describe" placeholder="请描述下具体内容"></textarea>
+      <div class="taskFinish_flex">
+        <image class="push_img" :src="item" alt="" v-for="(item, index) in chooseActionImg" :key="index"
+          v-if="chooseActionImg.length != 0" @longpress="deleteImg(index)">
+          <image class="push_img" src="/static/add_Action_photo.png" alt="" v-if="chooseActionImg.length < 4"
+            @click="chooseActionImgBtn">
+      </div>
+      <text class="taskFinish_tip">任务图片（可选，最多4张，长按删除）</text>
+    </div>
+    <div style="flex: 1;" @click="focused"></div>
+    <div class="taskFinish_box">
+      <text class="taskFinish_sub" @click="taskFinish">提交</text>
+    </div>
+  </div>
+</template>
+<script>
+  import http from '@/utils/request'
+  import { mapMutations } from 'vuex'
+	var bitmap = null;
+  export default {
+    data() {
+      return {
+        describe: '',
+        residue: 4,
+        chooseActionImg: [],
+        imgList: [],
+        taskId: Number
+      }
+    },
+    onLoad(e) {
+      this.taskId = Number(e.taskId)
+    },
+    methods: {
+      ...mapMutations(['subSuccess']),
+      focused() {
+        uni.hideKeyboard()
+      },
+      deleteImg(e) {
+        this.imgList.splice(e, 1)
+      },
+      // 选择人物图片
+      chooseActionImgBtn() {
+        let that = this
+        const token = uni.getStorageSync('yq_token')
+        let residue = that.residue
+        uni.chooseImage({
+          count: residue,
+          sizeType: ['compressed'], //可以指定是原图还是压缩图，默认二者都有
+          success: function (res) {
+            let imgList = that.chooseActionImg
+            imgList = imgList.concat(res.tempFilePaths)
+            that.chooseActionImg = imgList
+            that.residue = 4 - that.chooseActionImg.length
+            res.tempFilePaths.forEach(val => {
+              that.upload(val)
+            })
+          },
+          fail: function (res) {
+          }
+        });
+      },
+      // 上传文件
+      upload(filePath) {
+        let that = this
+        const token = uni.getStorageSync('yq_token')
+        uni.uploadFile({
+          url: 'https://api.yqyes.com/common/upload', //仅为示例，非真实的接口地址
+          filePath: filePath,
+          name: 'file',
+          header: {
+            Authorization: token // 自定义请求头信息
+          },
+          success: (res) => {
+            that.imgList.push(JSON.parse(res.data).data)
+          },
+          fail: (res) => {
+          }
+        })
+      },
+      taskFinish() {
+        let that = this
+        const subNVueSure = uni.getSubNVueById('finishToast')
+        let data = {
+          finishImages: JSON.stringify(that.imgList),
+          taskId: that.taskId,
+          finishDesc: that.describe
+        }
+		
+        http('put', 'taskOrder/submit', data, res => {
+          if (res.code == 200) {
+            // 打开 nvue 子窗体  
+            that.subSuccess(1)
+			
+            subNVueSure.show('slide-in-bottom', 300, function () {
+              // 打开后进行一些操作...  
+              //   
+            })
+              uni.$emit('submit_finish',{
+              content: '任务提交成功',
+              goback: 1
+              })
+          }
+        })
+      },
+      deleteImg(i) {
+        let that = this
+        this.chooseActionImg.splice(i, 1)
+        this.imgList.splice(i, 1)
+        that.residue += 1
+      }
+    },
+    onNavigationBarButtonTap: function onNavigationBarButtonTap(e) {
+      uni.navigateBack({
+        delta: 1
+      });
+    }
+  }
+</script>
+<style scoped>
+  .taskFinish {
+    flex: 1;
+    background-color: #fff;
+    padding: 25px 18px;
+    padding-bottom: 31px;
+  }
+
+  .textA {
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 20px;
+    height: 40px;
+  }
+
+  .taskFinish_flex {
+    margin-top: 48px;
+    flex-direction: row;
+  }
+
+  .push_img {
+    width: 60px;
+    height: 60px;
+    margin-right: 10px;
+  }
+
+  .taskFinish_tip {
+    font-size: 14px;
+    font-weight: 400;
+    color: rgba(170, 170, 170, 1);
+    line-height: 20px;
+    margin-top: 10px;
+  }
+
+  .taskFinish_box {
+    flex-direction: row;
+    justify-content: center;
+  }
+
+  .taskFinish_sub {
+    width: 240px;
+    height: 50px;
+    background-color: rgba(73, 109, 245, 1);
+    border-radius: 8px;
+    line-height: 50px;
+    text-align: center;
+    color: #fff;
+  }
+</style>

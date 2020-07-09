@@ -1,0 +1,132 @@
+<template>
+	<div class="withdrawal">
+		<div>
+			<div class="withdrawal_top">
+				<text class="withdrawal_top_text">姓名</text>
+				<input type="text" confirm-type="next" v-model="alipayUsername" class="withdrawal_top_input"
+					placeholder="请输入姓名">
+			</div>
+			<div class="withdrawal_top" style="margin-top: 1px;">
+				<text class="withdrawal_top_text">支付宝账号</text>
+				<input type="text" v-model="alipay" class="withdrawal_top_input" placeholder="请输入账号">
+			</div>
+		</div>
+		<div style="flex: 1;"  @click="focused"></div>
+		<div class="real_name_btn_box">
+			<div class="real_name_btn" @click="show">
+				<text class="real_name_btn_text">确定</text>
+			</div>
+		</div>
+	</div>
+</template>
+<script>
+	import http from '@/utils/request'
+	export default {
+		components: {
+		},
+		data() {
+			return {
+				alipayUsername: '',
+				alipay: '',
+				width: 0,
+				way: 1,
+				way_flag: false
+			}
+		},
+		onLoad() {
+			const width = uni.getSystemInfoSync().windowWidth;
+			this.width = width
+		},
+		onShow() {
+		},
+		onHide() {
+
+		},
+		methods: {
+			focused() {
+				uni.hideKeyboard()
+			},
+			show() {
+				let data = {
+					alipayUsername: this.alipayUsername,
+					alipay: this.alipay
+				}
+				const subNVue = uni.getSubNVueById('sureToast')
+				http('put', 'clientUser/update', data, res => {
+					if (res.code == 200) {
+						uni.showToast({
+							title: '绑定成功',
+							duration: 1500
+						})
+						// 打开 nvue 子窗体  
+						// subNVue.show('slide-in-bottom', 300, function () {
+						// 	// 打开后进行一些操作...  
+						// 	//   
+						// });
+						// subNVue.postMessage({
+						// 	content: '绑定成功',
+						// 	goback: 1
+						// });
+					}
+				})
+			}
+		},
+		onNavigationBarButtonTap: function onNavigationBarButtonTap(e) {
+			uni.navigateBack({
+				delta: 1
+			});
+		}
+	}                                                                                                    
+</script>
+<style scoped>
+	.withdrawal {
+		background-color: #f6f6f6;
+		padding-top: 1px;
+		padding-bottom: 32px;
+		padding-bottom: 32px;
+		flex: 1;
+		justify-content: space-between;
+	}
+
+	.withdrawal_top {
+		flex-direction: row;
+		padding: 0 20px;
+		height: 53px;
+		align-items: center;
+		background-color: #fff;
+	}
+
+	.withdrawal_top_text {
+		font-size: 14px;
+		font-weight: 400;
+		color: rgba(0, 0, 0, 1);
+		width: 90px;
+	}
+
+	.withdrawal_top_input {
+		font-size: 14px;
+		width: 200px;
+		margin-left: 10px;
+	}
+
+	.real_name_btn_box {
+		justify-content: center;
+		align-items: center;
+	}
+
+	.real_name_btn {
+		width: 240px;
+		height: 50px;
+		background-color: rgba(73, 109, 245, 1);
+		border-radius: 8px;
+		justify-content: center;
+		align-items: center;
+	}
+
+	.real_name_btn_text {
+		font-size: 16px;
+		font-weight: 600;
+		color: rgba(255, 255, 255, 1);
+		/* line-height:22px; */
+	}
+</style>

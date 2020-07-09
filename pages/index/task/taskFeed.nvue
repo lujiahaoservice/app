@@ -1,0 +1,233 @@
+<template>
+  <div class="taskFeed">
+    <scroll-view scroll-y="true">
+      <!-- <div class="icon-an"></div> -->
+      <div class="taskFeed_people">
+        <image class="taskFeed_ava" :src="from == 1 ? task.userPhoto : task.executorPhoto" alt="">
+          <div class="taskFeed_peopleMsg">
+            <text class="taskFeed_title">{{from == 1 ? '发布者' : '接单者'}}</text>
+            <text class="taskFeed_name">{{from == 1 ? task.username : task.executor}}</text>
+          </div>
+      </div>
+      <div class="flex_center">
+        <text class="taskFeed_status">任务已完成</text>
+      </div>
+      <div class="flex_center">
+        <text class="taskFeed_how">请评价下对方的服务吧</text>
+      </div>
+      <div class="star_flex_center">
+        <uni-rate size="34" :value="star" active-color="#FFDC00" color="#D8D8D8" @change="starsChange"></uni-rate>
+        <!-- <image class="star_size" src="/static/liang.png" alt="" v-for="(item, index) in star" :key="index"
+          @click="deleteStars(index)">
+          <image class="star_size" src="/static/an.png" alt="" v-for="(item, index) in (5 - star)" :key="index"
+            @click="addStars(index)"> -->
+      </div>
+      <div class="flex_center">
+        <textarea v-model="textA" class="textA" placeholder="其他意见或者建议"></textarea>
+      </div>
+      <div class="taskFeed_sub_center">
+        <text class="taskFeed_sub" @click="feed_sub">提交</text>
+      </div>
+    </scroll-view>
+  </div>
+</template>
+
+<script>
+  import http from '@/utils/request'
+  import uniRate from '@/components/uni-rate/uni-rate.vue'
+  export default {
+    components: {
+      uniRate
+    },
+    data() {
+      return {
+        hasFeed: 0,
+        star: 1,
+        textA: '',
+        task: {},
+        from: 0
+      }
+    },
+    onLoad(e) {
+      // const msg = JSON.parse(e.msg)
+      this.task = {
+        userPhoto: e.userPhoto,
+        executorPhoto: e.executorPhoto,
+        username: e.username,
+        executor: e.executor,
+        taskId: e.taskId
+      }
+      this.from = e.from
+    },
+    onShow() {
+      // if (this.hasFeed == 1) {
+      //   uni.navigateBack({
+      //     delta: 1
+      //   });
+      // }
+    },
+    methods: {
+      // 减少星星
+      // deleteStars(i) {
+      //   this.star = i + 1
+      // },
+      // addStars(i) {
+      //   this.star = i + 1 + this.star
+      // },
+      starsChange(e) {
+        this.star = e.value
+      },
+      feed_sub() {
+        let that = this
+        const subNVueSureIt = uni.getSubNVueById('sureToastIt')
+        let data = {
+          stars: this.star,
+          details: this.textA,
+          taskId: this.task.taskId
+        }
+        http('post', 'taskOrderComment/add', data, res => {
+          if (res.code == 200) {
+            that.hasFeed = 1
+            // subNVueSureIt.postMessage({
+            //   content: '评论发表成功,互相评论后可见',
+            //   goback: 1
+            // })
+            // 打开 nvue 子窗体  
+            subNVueSureIt.show('slide-in-bottom', 300, function () {
+              // 打开后进行一些操作...  
+              //   
+            })
+			
+			 uni.$emit('getAgree',{
+				 msg: '评论发表成功,互相评论后可见',
+				 goback: 1
+			 })
+          }
+        })
+      }
+    },
+    onNavigationBarButtonTap: function onNavigationBarButtonTap(e) {
+      uni.navigateBack({
+        delta: 1
+      });
+    }
+  }
+</script>
+
+<style scoped>
+  .taskFeed {
+
+    height: 100%;
+    flex-direction: column;
+    flex: 1;
+    background-color: #fff;
+  }
+
+  .taskFeed_people {
+
+    padding: 20px;
+    padding-bottom: 30px;
+  }
+
+  .taskFeed_people {
+
+    flex-direction: row;
+  }
+
+  .taskFeed_ava {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+  }
+
+  .taskFeed_peopleMsg {
+
+    margin-left: 14px;
+    height: 60px;
+    justify-content: center;
+  }
+
+  .taskFeed_title {
+    height: 20px;
+    font-size: 14px;
+    font-weight: 600;
+    color: rgba(0, 0, 0, 1);
+    line-height: 20px;
+  }
+
+  .taskFeed_name {
+    height: 20px;
+    font-size: 14px;
+    font-weight: 400;
+    color: rgba(0, 0, 0, 1);
+    line-height: 20px;
+  }
+
+  .flex_center {
+
+    flex-direction: row;
+    justify-content: center;
+  }
+
+  .taskFeed_status {
+    font-size: 18px;
+    font-weight: 600;
+    color: rgba(0, 0, 0, 1);
+    line-height: 25px;
+  }
+
+  .taskFeed_how {
+    font-size: 12px;
+    font-weight: 400;
+    color: rgba(170, 170, 170, 1);
+    line-height: 17px;
+  }
+
+  .star_flex_center {
+
+    flex-direction: row;
+    justify-content: center;
+    margin-top: 20px;
+  }
+
+  .star_size {
+    width: 32px;
+    height: 29px;
+    margin-right: 8px;
+  }
+
+  .textA {
+    width: 300px;
+    height: 200px;
+    margin-top: 54px;
+    padding: 10px 19px;
+    background-color: rgba(255, 255, 255, 1);
+    border-radius: 8px;
+    border-style: solid;
+    border-color: rgba(170, 170, 170, 1);
+    border-width: 1px;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 20px;
+  }
+
+  .taskFeed_sub_center {
+
+    flex-direction: row;
+    justify-content: center;
+    margin-top: 65px;
+    padding-bottom: 31px;
+  }
+
+  .taskFeed_sub {
+    width: 240px;
+    height: 50px;
+    background-color: rgba(73, 109, 245, 1);
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 1);
+    line-height: 50px;
+    text-align: center;
+  }
+</style>

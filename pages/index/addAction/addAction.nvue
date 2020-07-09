@@ -1,0 +1,865 @@
+<template>
+	<div class="addAction">
+		<!-- v-if="taskData.cityCode" -->
+		<scroll-view scroll-y=true scroll-x=true show-scrollbar=false class="addAction_start">
+			<text class="addAction_header">发布前，可以查询参考价格，有助于更容易被接单</text>
+			<div class="addAction_checkbox1" @click="to_choose">
+				<div class="flexIt">
+					<text class="addAction_Font">任务类型</text>
+					<text class="addAction_type">{{chooseType.title ? chooseType.title : '选择任务类型'}}</text>
+					<text class="addAction_which"
+						:style="{borderColor: chooseType.name ? 'rgba(73, 109, 245, 1)' : '#fff'}">{{chooseType.name ? chooseType.name : ' '}}</text>
+				</div>
+				<image class="addAction_goCheck" src="/static/goCheck.png" alt="">
+			</div>
+			<div class="addAction_center">
+				<div class="addAction_line"></div>
+			</div>
+			<div class="addAction_form">
+				<text class="addAction_Font">任务标题</text>
+				<input class="addAction_form_input" v-model="taskData.title" confirm-type="next" type="text"
+					placeholder="请输入标题">
+			</div>
+			<div class="addAction_center">
+				<div class="addAction_line"></div>
+			</div>
+			<div class="addAction_area">
+				<textarea class="addAction_textarea" v-model="taskData.detail" style="font-size:14px;"
+					placeholder-style="font-size:14px;line-height:20px;color:#AAAAAA" placeholder="在此描述您需要的服务"></textarea>
+			</div>
+			<div class="addAction_full1">
+				<div class="addAction_fullLine1"></div>
+			</div>
+			<div class="addAction_add">
+				<text class="addAction_add_title">任务图片</text>
+				<div class="addAction_img_box">
+					<image class="addAction_img_btn" :src="item" @longpress="previewChooseActionImg(item, index)" alt=""
+						v-for="(item, index) in chooseActionImg" :key="index" v-if="chooseActionImg.length != 0">
+						<image @click="chooseActionImgBtn" class="addAction_img_btn" src="/static/add_Action_photo.png" alt=""
+							v-if="chooseActionImg.length < 4">
+				</div>
+				<text class="addAction_add_tip" v-if="chooseActionImg.length != 0">(长按删除图片)</text>
+			</div>
+			<div class="addAction_full1">
+				<div class="addAction_fullLine1"></div>
+			</div>
+			<div class="reward">
+				<text class="addAction_add_title">任务赏金</text>
+				<text class="icon_p">￥</text>
+				<input class="reward_input" v-model="taskData.money" comfirm-type="next" max="10000000" @input="priceFormat()" type="digit" placeholder="0">
+			</div>
+			<div class="addAction_notfull">
+				<div class="addAction_notfullLine"></div>
+			</div>
+			<div class="reward">
+				<text class="addAction_add_title">完成时间</text>
+				<picker class="timePicker" mode="date" :value="date" @change="bindDateChange">
+					<text class="timePicker_input">{{date}}</text>
+				</picker>
+				<picker class="timePicker" mode="time" :value="time" @change="bindTimeChange">
+					<text class="timePicker_input">{{time}}</text>
+				</picker>
+			</div>
+			<div class="addAction_full1">
+				<div class="addAction_fullLine1"></div>
+			</div>
+			<div class="rewardPlace" @click="choosePublishPlace">
+				<text class="addAction_place_title">发布地点</text>
+				<text class="publishPlace">{{publishPlace}}</text>
+				<image class="add_reward_address" src="/static/address.png" alt="">
+			</div>
+			<div class="addAction_notfull">
+				<div class="addAction_notfullLine"></div>
+			</div>
+			<div class="reward">
+				<input class="add_reward_addressI" v-model="taskData.publishPlace" confirm-type="next" type="text"
+					placeholder="请输入详细地址">
+			</div>
+			<div class="addAction_notfull">
+				<div class="addAction_notfullLine"></div>
+			</div>
+			<div class="rewardAl">
+				<text class="addAction_place_title">联系电话</text>
+				<input class="addAction_phoneInp" v-model="taskData.proPhone" placeholder="请输入联系电话" type="number">
+				<text class="publish">仅接单者可见</text>
+			</div>
+			<div class="addAction_full1">
+				<div class="addAction_fullLine1"></div>
+			</div>
+			<div v-if="chooseType.title == '跑腿任务' ? true : false">
+				<div class="rewardPlace" @click="choosePlace">
+					<text class="addAction_place_title">完成地点</text>
+					<text class="publishPlace">{{completePlace}}</text>
+					<image class="add_reward_address" src="/static/address.png" alt="">
+				</div>
+				<div class="addAction_notfull">
+					<div class="addAction_notfullLine"></div>
+				</div>
+				<div class="reward">
+					<input class="add_reward_addressI" v-model="taskData.completePlace" confirm-type="next" type="text"
+						placeholder="请输入详细地址">
+				</div>
+				<div class="addAction_notfull">
+					<div class="addAction_notfullLine"></div>
+				</div>
+				<div class="rewardAl">
+					<text class="addAction_place_title">联系电话</text>
+					<input class="addAction_phoneInp" v-model="taskData.comPhone" confirm-type="done" placeholder="请输入联系电话"
+						type="number">
+					<text class="publish">仅接单者可见</text>
+				</div>
+			</div>
+			<div class="addAction_Btn" @click="focused">
+				<text class="addAction_pubBtn" @click="showModal">发布</text>
+				<div class="addAction_agreement" @click="hadread = !hadread">
+					<image class="addAction_agreement_img" src="/static/mineImg/mine_annius.png" alt="" v-if="hadread">
+						<image class="addAction_agreement_img" src="/static/mineImg/mine_anniu.png" alt="" v-else>
+							<text class="addAction_text">我已认真阅读并同意</text><text class="addAction_textCl" @click="seeProtocol">《发布协议》</text>
+				</div>
+			</div>
+		</scroll-view>
+	</div>
+</template>
+
+<script>
+	import http from '@/utils/request'
+	import { mapState, mapMutations } from 'vuex'
+	export default {
+		data() {
+			return {
+				chooseActionImg: [],
+				hasClick: 0,
+				saveMoney: 0,
+				date: '',
+				time: '',
+				latitude: '',
+				longitude: '',
+				publishPlace: '请选择完成地址',
+				completePlace: '请选择完成地址',
+				residue: 4,
+				hadread: false,
+				width: 0,
+				way: 1,
+				way_flag: false,
+				upImg: [],
+				taskId: '',
+				citycode: '',
+				taskData: {
+					pcategoryName: '', // 父名
+					categoryName: '', // 子名
+					cityCode: '',
+					province: '', // 发布省
+					city: '', // 发布市，
+					district: '', // 发布区
+					title: '', // 任务标题
+					detail: '', // 任务描述
+					images: [], // 任务图片
+					money: '', // 任务赏金
+					completeTime: '', // 发布时间
+					lng: '', // 经度
+					lat: '', // 纬度
+					publishPlace: '', // 发布详细地址
+					proPhone: '',	// 发布人联系
+					comPhone: '',// 完成人联系
+					completePlace: '', // 完成地点
+					completeLat: '',
+					completeLng: '',
+					completeProvince: '',
+					completeCity: '',
+					completeDistrict: ''
+				}
+			}
+		},
+		computed: {
+			...mapState(['chooseType', 'place'])
+		},
+		watch: {
+			date(val) {
+				this.taskData.completeTime = val + ' ' + this.time
+			},
+			time(val) {
+				this.taskData.completeTime = this.date + ' ' + val
+			},
+			chooseType(val) {
+				this.taskData.pcategoryName = val.title
+				this.taskData.categoryName = val.name
+			}
+		},
+		onLoad(e) {
+			let that = this
+			this.citycode = uni.getStorageSync('yq_citycode')
+			that.taskData.cityCode = this.citycode
+			// 获取宽度
+			const width = uni.getSystemInfoSync().windowWidth;
+			this.width = width
+			// 获取当前时间
+			let currentDate = this.getDate({
+				format: true
+			})
+			currentDate = currentDate.split('-')[0] + '-' + currentDate.split('-')[1] + '-' + (currentDate.split('-')[2] * 1 + 1)
+			const currentTimeHour = new Date().getHours()
+			const currentTimeMin = new Date().getMinutes()
+			const currentTimeSe = new Date().getSeconds()
+			const currentTime = currentTimeHour + ':' + currentTimeMin + ':' + currentTimeSe
+			this.date = currentDate
+			this.time = currentTime
+			// 获取当前位置
+			uni.getLocation({
+				geocode: true,
+				type: 'gcj02', //返回可以用于uni.openLocation的经纬度
+				success: function (res) {
+					let place = res.address
+					that.taskData.lat = res.latitude
+					that.taskData.lng = res.longitude
+					that.publishPlace = place.province + ' ' + place.city + ' ' + place.district + ' ' + place.poiName
+					that.taskData.province = place.province
+					that.taskData.city = place.city
+					that.taskData.district = place.district
+					let point = new plus.maps.Point(res.longitude, res.latitude)
+					plus.maps.Map.reverseGeocode(
+						point,
+						{},
+						function (event) {
+							uni.request({
+								url: 'https://restapi.amap.com/v3/geocode/geo?parameters',
+								method: 'GET',
+								data: {
+									address: event.address,
+									key: 'd1c69d525cab4e37c7b426aa3a97eda6'
+								},
+								success: (res) => {
+									that.taskData.cityCode = res.data.geocodes[0].citycode || res.data.geocodes[0].citycode || that.citycode
+                  uni.setStorageSync('yq_citycode', that.cityCode)
+									if (e.id) {
+										that.taskId = e.id
+										that.getDetail(e.id)
+									} else {
+										that.initData()
+									}
+								}
+							});
+						},
+						function (e) { }
+					)
+				}
+			})
+		},
+		onShow() {
+			let that = this
+			const subNVue = uni.getSubNVueById('publish')
+			const subNVueSure = uni.getSubNVueById('sureToast')
+			// subNVue.onMessage((res) => {
+			// 	let data = res.data
+			// 	subNVueSure.postMessage({
+			// 		content: data.content,
+			// 		goback: res.data.goback
+			// 	})
+			// 	// 打开 nvue 子窗体  
+			// 	subNVueSure.show('slide-in-bottom', 300, function () {
+			// 		// 打开后进行一些操作...  
+			// 		//   
+			// 	})
+			// })
+		},
+		methods: {
+      ...mapMutations(['updateChooseType']),
+			//隐藏键盘
+			focused() {
+				uni.hideKeyboard()
+			},
+			priceFormat() {
+				let that = this
+				setTimeout(() => {
+					that.taskData.money=that.taskData.money.replace(/[^0123456789.]/,"")
+        //防止无输入无限个“.”
+					that.taskData.money=that.taskData.money.replace(/\.+/ ,".")
+					//在不是“0.”开头的字符进行修改：“01”=>1
+					if(that.taskData.money.charAt(0)=="0"&&that.taskData.money.charAt(1)!="."&&that.taskData.money.length>=2){
+						that.taskData.money=that.taskData.money.replace(/0/ ,"")
+					}
+					//获取第一个小数点的索引值
+					var index=that.taskData.money.indexOf('.')
+					//获取最后一个小数点的索引值
+					var lastIndex=that.taskData.money.lastIndexOf('.')
+					//判断小数点是不是开头，如果是开头，则去除
+					if(index==0){
+						that.taskData.money=that.taskData.money.replace(/\./ ,"")
+					}
+					//只允许小数点后面有2位字符
+					if(index>=1){
+						that.taskData.money=that.taskData.money.substring(0,index+3)          
+					}
+					//防止小数点后面又出现小数点
+					if(index!=lastIndex){
+						that.taskData.money=that.taskData.money.substring(0,index+2) 
+					}
+					if(that.taskData.money > 10000000) {
+						that.taskData.money = that.saveMoney
+					}
+					that.saveMoney = that.taskData.money
+				}, 0)
+			},
+			//审核未通过获取任务信息
+			getDetail(id) {
+				let that = this
+				http('get', 'task/detail', { id: id }, res => {
+					if (res.code == 200) {
+						let msg = res.data
+						that.updateChooseType({
+							title: msg.pcategoryName,
+							name: msg.categoryName
+						})
+						that.taskData.title = msg.title
+						that.taskData.cityCode = msg.cityCode
+						that.taskData.province = msg.province
+						that.taskData.city = msg.city
+						that.taskData.district = msg.district
+						that.taskData.detail = msg.detail
+						that.taskData.images = JSON.parse(msg.images)
+						that.chooseActionImg = JSON.parse(msg.images)
+						that.residue = 4 - JSON.parse(msg.images).length
+						that.taskData.money = (msg.money / 100).toFixed(2)
+						that.taskData.completeTime = msg.completeTime
+						that.date = msg.completeTime.split(' ')[0]
+						that.time = msg.completeTime.split(' ')[1]
+						that.taskData.lng = msg.lng
+						that.taskData.lat = msg.lat
+						that.taskData.publishPlace = msg.publishPlace
+						that.taskData.proPhone = msg.proPhone
+						that.taskData.completePlace = msg.completePlace
+						that.taskData.completeLat = msg.completeLat
+						that.taskData.completeLng = msg.completeLng
+						that.taskData.publishPlace = msg.publishPlace
+						that.taskData.completeProvince = msg.completeProvince
+						that.taskData.completeCity = msg.completeCity
+						that.taskData.completeDistrict = msg.completeDistrict
+						that.taskData.comPhone = msg.comPhone
+						that.completePlace = msg.completeProvince + ' ' + msg.completeCity + ' ' + msg.completeDistrict
+						that.publishPlace = msg.province + ' ' + msg.city + ' ' + msg.district
+					}
+				})
+			},
+			//选择任务
+			to_choose() {
+				uni.hideKeyboard()
+				uni.navigateTo({
+					url: '/pages/statistic/addAction/addAction'
+				})
+			},
+			// 选择人物图片
+			chooseActionImgBtn() {
+				let that = this
+				const token = uni.getStorageSync('yq_token')
+				let residue = that.residue
+				uni.chooseImage({
+					count: residue,
+					sizeType: ['compressed'], //可以指定是原图还是压缩图，默认二者都有
+					success: function (res) {
+						let imgList = that.chooseActionImg
+						imgList = imgList.concat(res.tempFilePaths)
+						that.chooseActionImg = imgList
+						that.residue = 4 - that.chooseActionImg.length
+						res.tempFilePaths.forEach(val => {
+							that.upload(val)
+						})
+					}
+				});
+			},
+			// 上传文件
+			upload(filePath) {
+				let that = this
+				const token = uni.getStorageSync('yq_token')
+				uni.uploadFile({
+					url: 'https://api.yqyes.com/common/upload', //仅为示例，非真实的接口地址
+					filePath: filePath,
+					name: 'file',
+					header: {
+						Authorization: token // 自定义请求头信息
+					},
+					success: (res) => {
+						that.taskData.images.push(JSON.parse(res.data).data)
+					},
+					fail: (res) => {
+						
+					}
+				})
+			},
+			// 预览选择图片
+			previewChooseActionImg(e, i) {
+				let that = this
+				this.chooseActionImg.splice(i, 1)
+				this.taskData.images.splice(i, 1)
+				that.residue += 1
+			},
+			bindDateChange: function (e) {
+				this.date = e.detail.value
+			},
+			bindTimeChange: function (e) {
+				this.time = e.detail.value + ':00'
+			},
+			getDate(type) {
+				const date = new Date();
+				let year = date.getFullYear();
+				let month = date.getMonth() + 1;
+				let day = date.getDate();
+				month = month > 9 ? month : '0' + month;;
+				day = day > 9 ? day : '0' + day;
+				return `${year}-${month}-${day}`;
+			},
+			choosePlace() {
+				let that = this
+				uni.hideKeyboard()
+				uni.chooseLocation({
+					success: function (res) {
+						that.taskData.completeLat = res.latitude;
+						that.taskData.completeLng = res.longitude
+						let point = new plus.maps.Point(res.longitude, res.latitude);
+						plus.maps.Map.reverseGeocode(
+							point,
+							{},
+							function (event) {
+								let address = event.address; // 转换后的地理位置
+								let point = event.coord; // 转换后的坐标信息
+								let coordType = event.coordType; // 转换后的坐标系类型
+								let reg = /.+?(省|市|自治区|自治州|县|区)/g;
+								let addressList = address.match(reg).toString().split(",");
+								that.taskData.completeProvince = addressList[0]
+								that.taskData.completeCity = addressList[1]
+								that.taskData.completeDistrict = addressList[2]
+								that.completePlace = that.taskData.completeProvince + ' ' + that.taskData.completeCity + ' ' + that.taskData.completeDistrict + ' ' + res.name
+							},
+							function (e) { }
+						);
+					}
+				});
+			},
+			choosePublishPlace() {
+				let that = this
+				uni.hideKeyboard()
+				uni.chooseLocation({
+					success: function (res) {
+						that.taskData.lat = res.latitude;
+						that.taskData.lng = res.longitude
+						let point = new plus.maps.Point(res.longitude, res.latitude);
+						plus.maps.Map.reverseGeocode(
+							point,
+							{},
+							function (event) {
+								let address = event.address; // 转换后的地理位置
+								let point = event.coord; // 转换后的坐标信息
+								let coordType = event.coordType; // 转换后的坐标系类型
+								let reg = /.+?(省|市|自治区|自治州|县|区)/g;
+								let addressList = address.match(reg).toString().split(",");
+								that.taskData.province = addressList[0]
+								that.taskData.city = addressList[1]
+								that.taskData.district = addressList[2]
+								that.publishPlace = that.taskData.province + ' ' + that.taskData.city + ' ' + that.taskData.district + ' ' + res.name
+							},
+							function (e) { }
+						);
+					}
+				});
+			},
+			initData() {
+				let that = this
+				http('get', 'clientUser/detail', {}, res => {
+					if (res.code == 200) {
+						that.userInfo = res.data
+						that.taskData.proPhone = res.data.mobile
+					}
+				})
+			},
+			//打开遮罩层
+			showModal() {
+				let that = this
+				const subNVue = uni.getSubNVueById('publish')
+				const subNVueSure = uni.getSubNVueById('sureToast')
+				const data = JSON.parse(JSON.stringify(that.taskData))
+				data.money = data.money * 100
+				data.images = JSON.stringify(that.taskData.images)
+				if (that.chooseType.title != '跑腿任务') {
+					delete data.completeLat
+					delete data.completeLng
+					delete data.completePlace
+					delete data.comPhone
+					delete data.completeProvince
+					delete data.completeCity
+					delete data.completeDistrict
+				}
+				if (!/^1[34578]\d{9}$/.test(data.proPhone)) {
+					uni.showToast({
+						title: "请输入正确的手机号",
+						icon: 'none'
+					})
+					return
+				}
+				if (data.comPhone && !/^1[34578]\d{9}$/.test(data.comPhone)) {
+					uni.showToast({
+						title: "请输入正确的手机号",
+						icon: 'none'
+					})
+					return
+				}
+				for (let val in data) {
+					if (data[val] == '') {
+						// subNVueSure.postMessage({
+						// 	getAgree: '请完整填写任务信息',
+						// })
+						// 打开 nvue 子窗体  
+						subNVueSure.show('slide-in-bottom', 300, function () {
+							// 打开后进行一些操作...  
+							//   
+						});
+						
+						uni.$emit('getAgree',{
+							msg: '请完整填写任务信息',
+							goback: 0
+						})
+						return
+					}
+				}
+				if (data.money == 0) {
+					uni.showToast({
+						title: '任务赏金不能为0',
+						duration: 1000,
+						icon: 'none'
+					})
+					this.taskData.money = ''
+					return
+				}
+				if (!this.hadread) {
+					// subNVueSure.postMessage({
+					// 	content: '请阅读并同意发布协议'
+					// })
+						uni.$emit('getAgree',{
+							msg: '请阅读并同意发布协议',
+							goback:0
+						})
+					// 打开 nvue 子窗体  
+					subNVueSure.show('slide-in-bottom', 300, function () {
+						// 打开后进行一些操作...  
+						//   
+					});
+				} else {
+					// 打开 nvue 子窗体  
+					subNVue.show('slide-in-bottom', 300, function () {
+						// 打开后进行一些操作...  
+						//   
+					});
+					// subNVue.postMessage({
+					// 	payMsg: JSON.stringify(data),
+					// 	taskId: that.taskId
+					// })
+						uni.$emit('action_publish',{
+							payMsg: JSON.stringify(data),
+							taskId: that.taskId
+						})
+				}
+			},
+			// 查看协议
+			seeProtocol() {
+				if(this.hasClick != 0) return
+				this.hasClick = 1
+				uni.navigateTo({
+					url: '/pages/statistic/protocol/publish'
+				})
+				setTimeout(() => {
+					this.hasClick = 0
+				}, 600)
+			}
+		},
+		onPullDownRefresh() {
+			uni.stopPullDownRefresh();
+		},
+		onNavigationBarButtonTap: function onNavigationBarButtonTap(e) {
+			setTimeout(() => {
+				uni.navigateBack({
+					delta: 1
+				})
+			}, 1000)
+		}
+	}
+</script>
+
+<style scoped>
+	.addAction {
+		flex: 1;
+		background-color: #fff;
+	}
+
+	.addAction_header {
+		font-size: 12px;
+		font-weight: 400;
+		color: rgba(0, 0, 0, 1);
+		line-height: 17px;
+		text-align: center;
+		padding-top: 12px;
+	}
+
+	.addAction_center {
+		padding-left: 18px;
+		margin-top: 10px;
+	}
+
+	.addAction_line {
+		width: 345px;
+		height: 1px;
+		background-color: #F1F1F1;
+	}
+
+	.addAction_notfull {
+		margin-left: 15px;
+	}
+
+	.addAction_fullLine {
+		height: 1px;
+		background-color: #F6F6F6;
+	}
+
+	.addAction_notfullLine {
+		height: 1px;
+		background-color: #F6F6F6;
+		width: 345px;
+	}
+
+	.addAction_fullLine1 {
+		height: 6px;
+		background-color: #F6F6F6;
+	}
+
+	.addAction_checkbox1 {
+		padding-left: 18px;
+		padding-right: 12px;
+		margin-top: 13px;
+		align-items: center;
+		flex-direction: row;
+		font-size: 14px;
+		justify-content: space-between;
+	}
+
+	.addAction_Font {
+		font-size: 14px;
+	}
+
+	.flexIt {
+		flex-direction: row;
+		align-items: center;
+	}
+
+	.addAction_type {
+		font-weight: 400;
+		color: rgba(73, 109, 245, 1);
+		margin: 0 22px;
+		font-size: 28rpx;
+	}
+
+	.addAction_which {
+		padding: 0 25px;
+		height: 30px;
+		border-radius: 8px;
+		border-width: 1px;
+		border-style: solid;
+		border-color: rgba(73, 109, 245, 1);
+		line-height: 30px;
+		text-align: center;
+		color: #496DF5;
+		font-size: 14px;
+	}
+
+	.addAction_goCheck {
+		width: 14px;
+		height: 14px;
+	}
+
+	.addAction_form {
+		align-items: center;
+		padding-left: 18px;
+		padding-right: 12px;
+		flex-direction: row;
+		height: 60px;
+	}
+
+	.addAction_Font {
+		font-weight: 600;
+		height: 20px;
+		color: rgba(0, 0, 0, 1);
+		line-height: 20px;
+		width: 70px;
+		font-size: 14px;
+	}
+
+	.addAction_form_input {
+		width: 280px;
+		height: 20px;
+		font-size: 14px;
+		font-weight: 500;
+		line-height: 20px;
+		margin-left: 10px;
+		padding: 0;
+	}
+
+	.addAction_area {
+		width: 375px;
+		height: 138px;
+	}
+
+	.addAction_textarea {
+		width: 375px;
+		height: 138px;
+		padding: 10px 18px;
+	}
+
+	.addAction_add {
+		width: 375px;
+		height: 111px;
+		padding: 10px 18px;
+		justify-content: space-between;
+	}
+
+	.addAction_add_title {
+		font-size: 14px;
+		font-weight: 600;
+		color: rgba(0, 0, 0, 1);
+		line-height: 20px;
+	}
+
+	.addAction_img_box {
+		flex-direction: row;
+	}
+
+	.addAction_img_btn {
+		width: 60px;
+		height: 60px;
+		margin-right: 10px;
+	}
+
+	.addAction_add_tip {
+		font-size: 11px;
+		margin-top: 4px;
+	}
+
+	.rewardPlace {
+		height: 60px;
+		flex-direction: row;
+		align-items: center;
+		padding-left: 18px;
+		padding-right: 25px;
+		justify-content: space-between;
+	}
+
+	.reward {
+		height: 60px;
+		flex-direction: row;
+		align-items: center;
+		padding-left: 18px;
+	}
+
+	.rewardAl {
+		height: 60px;
+		padding-right: 25px;
+		flex-direction: row;
+		justify-content: space-between;
+		align-items: center;
+		padding-left: 18px;
+	}
+
+	.icon_p {
+		margin-left: 14px;
+		margin-right: 17px;
+		font-size: 14px;
+	}
+
+	.reward_input {
+		height: 25px;
+		width: 222px;
+		font-size: 14px;
+	}
+
+	.timePicker {
+		margin-left: 21px;
+	}
+
+	.timePicker_input {
+		font-size: 14px;
+	}
+
+	.addAction_place_title {
+		font-size: 14px;
+		padding-right: 20px;
+	}
+
+	.publish {
+		font-size: 14px;
+	}
+
+	.publishPlace {
+		font-size: 14px;
+		width: 250px;
+	}
+
+	.add_reward_address {
+		width: 16px;
+		height: 16px;
+		/* margin-right: 25px; */
+	}
+
+	.add_reward_addressI {
+		height: 20px;
+		width: 260px;
+		font-size: 14px;
+	}
+
+	.addAction_phoneInp {
+		width: 180px;
+		height: 20px;
+		font-size: 14px;
+		padding-right: 20px;
+	}
+
+	.addAction_Btn {
+		padding: 20px 0;
+		align-items: center;
+		background-color: rgba(246, 246, 246, 1);
+	}
+
+	.addAction_pubBtn {
+		width: 240px;
+		height: 50px;
+		background-color: rgba(73, 109, 245, 1);
+		border-radius: 8px;
+		color: #fff;
+		font-size: 16px;
+		font-weight: 600;
+		text-align: center;
+		line-height: 50px;
+	}
+
+	.addAction_agreement_img {
+		width: 12px;
+		height: 12px;
+	}
+
+	.addAction_agreement {
+		flex-direction: row;
+		margin-top: 10px;
+	}
+
+	.addAction_text {
+		font-size: 10px;
+		height: 14px;
+		font-size: 10px;
+		font-weight: 400;
+		color: rgba(0, 0, 0, 1);
+		line-height: 14px;
+		margin-left: 5px;
+	}
+
+	.addAction_textCl {
+		font-size: 10px;
+		height: 14px;
+		font-size: 10px;
+		font-weight: 400;
+		color: #496DF5;
+		line-height: 14px;
+	}
+</style>

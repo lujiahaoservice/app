@@ -1,0 +1,180 @@
+<template>
+  <view class="showToast">
+    <view class="showToast_box" :style="{height: taskAmount ? '151px' : '129px'}">
+      <view class="showToast_content" :style="{height: taskAmount ? '107px' : '85px'}">
+        <text class="showToast_read">{{sureGet == 0 ? '已阅读《接单协议》可以完成此任务！' : '是否确认验收'}}</text>
+        <text class="showToast_dosure" v-if="sureGet == 0 && taskAmount">平台抽成{{platformPumping || 0}}%，扣除{{(taskAmount / 100).toFixed(2) || 0}}元</text>
+        <text class="showToast_dosure" v-if="sureGet == 0">确定接单吗？</text>
+      </view>
+      <view class="showToast_line"></view>
+      <view class="showToast_double">
+        <text class="showToast_cancel" @click="cancel">取消</text>
+        <view class="center_line"></view>
+        <text class="showToast_sure" @click="sure">确认</text>
+      </view>
+    </view>
+  </view>
+</template>
+
+<script>
+  import http from '@/utils/request'
+  import { mapMutations } from 'vuex'
+  export default {
+    data() {
+      return {
+        taskId: '',
+        sureGet: 0,
+        platformPumping: '',
+        taskAmount: ''
+      }
+    },
+    onLoad(options) {
+      let that = this
+      const subNVue = uni.getCurrentSubNVue()
+	  uni.$on('update',function(data){
+		  that.sureGet = data.sureGet
+		  that.taskId = data.sureId
+	  })
+	  
+	  uni.$on('receive',function(data){
+	  		    that.taskId = data.taskId
+	  		    that.platformPumping = data.platformPumping
+	  		    that.taskAmount = data.taskAmount
+	  		    that.clickIndex = data.clickIndex
+	  })
+      subNVue.onMessage(res => {
+		//原验收后获取值
+        if (res.data.sureGet) {
+          that.sureGet = res.data.sureGet
+          that.taskId = res.data.sureId
+        }
+		//原接单后获取值
+        if (res.data.taskId) {
+          that.taskId = res.data.taskId
+          that.platformPumping = res.data.platformPumping
+          that.taskAmount = res.data.taskAmount
+          that.clickIndex = res.data.clickIndex
+        }
+      })
+    },
+    methods: {
+      ...mapMutations(['deleteGetTask']),
+      sure() {
+        let that = this
+        const subNVue = uni.getCurrentSubNVue()
+        let data = {
+          taskId: that.taskId
+        }
+        if (that.sureGet == 0) {
+          http('post', 'taskOrder/receive', data, res => {
+            if (res.code == 200) {
+              that.deleteGetTask(that.clickIndex)
+              subNVue.hide('slide-out-bottom', 300);
+			  
+			  uni.$emit('receive',{
+			  	taskId: that.taskId,
+			  	clickIndex: that.clickIndex,
+			  	taskAmount: that.taskDetail.taskAmount || '',
+			  	platformPumping: that.taskDetail.platformPumping || '',
+			  })
+              // subNVue.postMessage({
+              //   content: '接单成功',
+              //   taskId: that.taskId
+              // })
+            }
+          })
+        } else {
+          let data = {
+            taskId: that.taskId
+          }
+          const subNVue = uni.getCurrentSubNVue()
+          subNVue.postMessage({
+            refresh: 1
+          })
+          http('put', 'taskOrder/check', data, res => {
+            if (res.code == 200) {
+              subNVue.hide('slide-out-bottom', 300)
+              this.sureGet = 0
+            }
+          })
+        }
+      },
+      cancel() {
+        const subNVue = uni.getCurrentSubNVue()
+        subNVue.hide('slide-out-bottom', 300)
+        this.sureGet = 0
+      }
+    }
+  }
+</script>
+
+<style scoped>
+  .showToast {
+    /* #ifndef APP-NVUE */
+    width: 100%;
+    height: 100%;
+    /* #endif */
+    justify-content: center;
+    align-items: center;
+  }
+
+  .showToast_box {
+    width: 270px;
+    height: 129px;
+    background-color: #fff;
+    border-radius: 8px;
+  }
+
+  .showToast_content {
+    height: 85px;
+    padding: 24px 16px 17px 16px;
+  }
+
+  .showToast_read {
+    font-size: 14px;
+    color: rgba(51, 51, 51, 1);
+    line-height: 22px;
+    text-align: center;
+  }
+
+  .showToast_dosure {
+    font-size: 14px;
+    color: #496DF5;
+    line-height: 22px;
+    text-align: center;
+  }
+
+  .showToast_line {
+    height: 1px;
+    background-color: rgba(220, 220, 220, 1);
+  }
+
+  .showToast_double {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .showToast_cancel {
+    width: 135px;
+    text-align: center;
+    font-size: 18px;
+    font-weight: 400;
+    color: rgba(153, 153, 153, 1);
+    line-height: 24px;
+  }
+
+  .center_line {
+    width: 1px;
+    height: 44px;
+    background-color: rgba(221, 221, 221, 1);
+  }
+
+  .showToast_sure {
+    width: 134px;
+    text-align: center;
+    font-size: 18px;
+    font-weight: 400;
+    color: #496DF5;
+    line-height: 24px;
+  }
+</style>

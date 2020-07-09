@@ -1,0 +1,288 @@
+<template>
+  <view class="userInfo">
+    <view class="user_line" @click="chooseAva">
+      <text class="line_title">头像</text>
+      <view class="line_right">
+        <view class="line_content">
+          <image class="photo" :src="photo" alt="头像" />
+        </view>
+        <image class="line_more" src="../../../static/mineImg/mine_details.png" alt="更多" />
+      </view>
+    </view>
+    <view class="user_line">
+      <text class="line_title">昵称</text>
+      <view class="line_right">
+        <!-- <text class="line_content">{{userInfo.nickname}}</text> -->
+        <input type="text" v-model="nickname" class="line_input"  />
+        <image class="line_more" style="visibility: hidden;" src="../../../static/mineImg/mine_details.png" alt="更多" />
+      </view>
+    </view>
+    <view class="user_line">
+      <text class="line_title">姓名</text>
+      <view class="line_right">
+        <text class="line_content" @click="userNameFun" v-if="userName != ''">{{userName}}</text>
+        <text class="line_content line_content_color" @click="toGetUserName" v-else>未实名认证</text>
+        <!-- <input type="text" v-model="userName" class="line_input"  /> -->
+        <image class="line_more" style="visibility: hidden;" src="../../../static/mineImg/mine_details.png" alt="更多" />
+      </view>
+    </view>
+    <view class="user_line">
+      <text class="line_title">性别</text>
+      <view class="line_right">
+        <text class="line_content">{{userInfo.sex === 0?'未知':(userInfo.sex === 1?'男':'女')}}</text>
+        <image class="line_more" style="visibility: hidden;" src="../../../static/mineImg/mine_details.png" alt="更多" />
+      </view>
+    </view>
+    <view class="user_line">
+      <text class="line_title">手机号码</text>
+      <view class="line_right">
+        <!-- <text class="line_content">{{userInfo.mobile}}</text> -->
+        <input type="number" v-model="mobile" class="line_input"  />
+        <image class="line_more" style="visibility: hidden;" src="../../../static/mineImg/mine_details.png" alt="更多" />
+      </view>
+    </view>
+    <view class="user_line">
+      <text class="line_title">所在城市</text>
+      <view class="line_right">
+        <!-- <text class="line_content">{{userInfo.city}}</text> -->
+        <input type="text" v-model="city" class="line_input" />
+        <image class="line_more" style="visibility: hidden;" src="../../../static/mineImg/mine_details.png" alt="更多" />
+      </view>
+    </view>
+    <view class="user_line" @click="to_interesting(1)">
+      <text class="line_title">兴趣行业</text>
+      <view class="line_right">
+        <view class="line_content like_list">
+          <text class="like_single" v-for="(item, index) in userInfo.interest" :key="index">{{item.name}}</text>
+        </view>
+        <image class="line_more" src="../../../static/mineImg/mine_details.png" alt="更多" />
+      </view>
+    </view>
+    <view class="user_line" @click="to_interesting(2)">
+      <text class="line_title">提现账号</text>
+      <view class="line_right">
+        <view class="line_content"></view>
+        <image class="line_more" src="../../../static/mineImg/mine_details.png" alt="更多" />
+      </view>
+    </view>
+  </view>
+</template>
+
+<script>
+import http from '@/utils/request'
+import { showLoading } from '@/utils/common'
+export default {
+  /**
+   * @param onNavigationBarButtonTap
+   * 监听导航栏按钮
+   * left 返回
+   * right 保存
+   */
+   onNavigationBarButtonTap: function onNavigationBarButtonTap(e) {
+    if (e.float === "left") {
+      //返回
+      uni.navigateBack({
+        delta: 1
+      });
+    } else if (e.float === "right") {
+      //保存
+      this.gosave()
+    }
+  },
+  data() {
+    return {
+      userInfo: {},
+      nickname: '',
+      userName: '',
+      mobile: '',
+      photo: '',
+      city: ''
+    };
+  },
+  onLoad() {
+    
+  },
+  onShow() {
+    this.initData()
+  },
+  onHide() {
+    //
+  },
+  methods: {
+    initData() {
+      let that = this
+      http('get', 'clientUser/info', {}, res => {
+        if(res.code == 200) {
+          that.userInfo = res.data
+          if(that.userInfo.interest) {
+            that.userInfo.interest = JSON.parse(res.data.interest)
+          }
+          that.nickname = res.data.nickname
+          that.userName = res.data.name
+          that.mobile = res.data.mobile
+          that.photo = res.data.photo
+          that.city = res.data.city
+        }
+      })
+    },
+    userNameFun() {
+      uni.showToast({
+        title: '实名不可更改',
+        icon: 'none'
+      })
+    },
+    toGetUserName() {
+      uni.navigateTo({
+        url: '/pages/statistic/mine/realName'
+      })
+    },
+    chooseAva() {
+      let that = this
+      const token = uni.getStorageSync('yq_token')
+      uni.chooseImage({
+        count: 1,
+        sizeType: ['compressed'],
+        success: (chooseImageRes) => {
+          showLoading({
+            title: '上传中'
+          })
+          const tempFilePaths = chooseImageRes.tempFilePaths;
+          uni.uploadFile({
+            url: 'https://api.yqyes.com/common/upload', //仅为示例，非真实的接口地址
+            filePath: tempFilePaths[0],
+            name: 'file',
+            header: {
+              Authorization: token // 自定义请求头信息
+            },
+            success: (uploadFileRes) => {
+              uni.hideLoading()
+              const result = uploadFileRes.data
+              if (result) {
+                uni.showToast({
+                  title: '上传成功',
+                  duration: 1500
+                })
+                that.photo = JSON.parse(result).data
+              } else {
+                uni.showToast({
+                  title: '上传失败',
+                  duration: 1500,
+                  icon: 'none'
+                })
+              }
+            },
+            fail: () => {
+              uni.hideLoading()
+              uni.showToast({
+                title: '上传失败',
+                duration: 1500,
+                icon: 'none'
+              })
+            }
+          });
+        }
+      });
+    },
+    to_interesting(type) {
+      if (type === 1) {
+        uni.navigateTo({
+          url: '/pages/statistic/mine/interesting'
+        })
+      } else if (type === 2) {
+        uni.navigateTo({
+          url: '/pages/statistic/mine/changeAccount'
+        })
+      }
+      uni.hideKeyboard()
+    },
+    // 保存 PUT /clientUser/update
+    gosave() {
+      let that = this
+      let data = {
+        photo: that.photo,
+        nickname: that.nickname,
+        name: that.name,
+        mobile: that.mobile,
+        city: that.city
+      }
+      http('put', 'clientUser/update', data, res => {
+        if (res.code === '200') {
+          uni.showToast({
+            title: '保存成功',
+            success: () => {
+              that.initData()
+            }
+          })
+        }
+      })
+    }
+  }
+};
+</script>
+
+<style scoped>
+.userInfo {
+  font-size: 28rpx;
+  padding: 0 22rpx;
+  background-color: #fff;
+  flex:1;
+}
+.user_line {
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  height: 100rpx;
+  padding: 0 18rpx;
+  border-bottom-width: 1px ;
+  border-style: solid;
+  border-color: #dcdcdc;
+}
+
+
+.line_title {
+  font-size: 28rpx;
+  font-weight: 400;
+  color: rgba(0, 0, 0, 1);
+}
+.line_right {
+  flex-direction: row;
+  align-items: center;
+}
+.photo {
+  height: 60rpx;
+  width: 60rpx;
+  border-radius: 50%;
+}
+.like_list {
+  flex-direction: row;
+}
+.like_single {
+  font-size: 14px;
+  margin-left: 6px;
+}
+.line_content {
+  margin-right: 18rpx;
+  font-size: 14px;
+  font-weight: 400;
+  color: rgba(0, 0, 0, 1);
+}
+
+.line_content_color{
+  color: #ddd;
+}
+
+.line_input{
+  height: 100rpx;
+  width: 500rpx;
+  text-align: right;
+  margin-right: 18rpx;
+  font-size: 14px;
+  color: rgba(0, 0, 0, 1);
+}
+
+.line_more {
+  height: 28rpx;
+  width: 28rpx;
+}
+
+</style>

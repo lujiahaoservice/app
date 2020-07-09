@@ -1,0 +1,433 @@
+<template>
+	<div class="login_code">
+		<view v-if="!this.agree" class="wrap_cover">
+			<view class="popup_box">
+				<view uni-bold class="popup_title"><text class="title_text">隐私保护政策说明</text></view>
+				<view class="popup_content_box">
+					<view class="popup_content">
+						<view class="content_item"><text class="pop_text">根据监管要求，我们对《用勤接单平台隐私保护政策》进行了更新，现向您进行以下说明：</text></view>
+
+						<view class="content_item"><text class="pop_text">1.为了更好地向您提供服务，我们会收集，使用您必要的个人信息；</text></view>
+
+						<view class="content_item"><text class="pop_text">2.基于您的授权，我可以能获取您的位置等信息，你有权拒绝或取消授权；</text></view>
+
+						<view class="content_item"><text class="pop_text">3.我们会采用行业内高级大数据加密算法，保护您的个人信息；</text></view>
+
+						<view class="content_item"><text class="pop_text">4.除非法律规定，在没有获得您的授权下，我们不会向第三方共享，转让和公开披露您的个人信息；</text></view>
+
+						<view class="content_item"><text class="pop_text">5.您可以查询、更正、删除您的个人信息，也可以联系平台技术人员注销个人账号。</text></view>
+
+						<view class="content_item pop_text first_row">
+							<text class="first_row pop_text">6.请您仔细阅读并同意</text>
+							<text class="first_row pop_text agree_jump" @click="agreeJump(1)">《用户协议》</text>
+							<text class="first_row pop_text">和</text>
+							<text class="first_row pop_text  agree_jump" @click="agreeJump(2)">《隐私政策》</text>
+						</view>
+						<text class="pop_text">我们将忠实履行协议条款，为您提供更优质服务体验。</text>
+					</view>
+				</view>
+				<em class="line"></em>
+				<view class="popup_but" style="border:solid 1px red">
+					<view class="but_item_left" @click="cancelPup"><text class="but_text but_text_left">不同意</text></view>
+					<em class="line_tall"></em>
+					<view class="but_item_right" @click="agreePup"><text class="but_text but_text_right">同意并继续</text></view>
+				</view>
+			</view>
+		</view>
+		<div>
+			<div class="Adaptive"></div>
+			<div class="login_content">
+				<div class="logo_img"><image class="logo_img_son" src="../../static/login/logo.png" alt="" /></div>
+				<div class="getCodeInt">
+					<div class="account">
+						<div class="img1">
+							<image class="img1_son" src="../../static/login/iPhone.png" alt="" />
+							<div class="center">
+								<text class="center_text">账号</text>
+								<input class="center_int" type="number" placeholder-style="font-size: 16px" v-model="telPhone" placeholder="请输入手机号" maxlength="11" />
+							</div>
+						</div>
+						<div class="img2"><image @click="clearAccon" class="img2_son" src="../../static/login/delete.png" alt="" /></div>
+					</div>
+					<div class="account">
+						<div class="img1">
+							<image class="img1_son" src="../../static/login/yzm.png" alt="" />
+							<div class="center">
+								<text class="center_text">验证码</text>
+								<input class="center_int" type="number" placeholder-style="font-size: 16px" v-model="code" placeholder="请输入验证码" maxlength="6" />
+							</div>
+						</div>
+						<div class="getCode" @click="getVerCodeFun">
+							<text class="getCodeText">{{ getVerCodeTie }}</text>
+						</div>
+					</div>
+				</div>
+				<div class="btn_login" @click="FungoHome"><text class="btn_login_text">登录</text></div>
+			</div>
+		</div>
+	</div>
+</template>
+
+<script>
+import { showLoading, showToast, navigateTo } from '@/utils/common.js';
+import { mapState, mapMutations } from 'vuex';
+import http from '@/utils/request';
+export default {
+	data() {
+		return {
+			cid: '',
+			telPhone: '',
+			code: '',
+			agree: null,
+			times: 60,
+			getVerCodeTie: '获取验证码',
+			getVerCodeTieFlag: true, // 时间没到不能获取
+			goDiligenceS: 1
+		};
+	},
+	computed: {
+		...mapState(['place'])
+	},
+	onLoad() {
+		// uni.setStorageSync('token', 'cda036e3b0754df5a65cd021258229d348');	//直接储存token
+		//this.agree = uni.getStorageSync('agreement');	//已同意协议
+		var pinf = plus.push.getClientInfo();
+		var cid = pinf.clientid; //客户端标识
+		this.cid = cid;
+		const subNVue = uni.getSubNVueById('subNvue');
+	},
+	onShow() {
+		this.agree = uni.getStorageSync('agreement');
+	},
+	methods: {
+		...mapMutations(['getPlace']),
+		FungoHome() {
+			let that = this;
+			if (this.goDiligenceS == 1) {
+				this.goDiligenceS = 0;
+				setTimeout(() => {
+					this.goDiligenceS += 1;
+				}, 1000);
+			} else {
+				return;
+			}
+			const data = {
+				cid: this.cid,
+				mobile: this.telPhone,
+				msgCode: this.code
+			};
+			http('post', 'clientUser/login', data, res => {
+				if (res.code == 200) {
+					uni.setStorageSync('yq_token', res.data.token);
+					that.getPlace();
+					if (res.data.status === 1) {
+						uni.navigateTo({
+							url: '/pages/login/sel_like'
+						});
+					} else {
+						uni.switchTab({
+							url: '/pages/index/home/home'
+						});
+					}
+				}
+			});
+		},
+		//取消协议弹窗
+		cancelPup() {
+			if(plus.os.name == "iOS" || plus.os.name == "ios") {
+				plus.ios.import("UIApplication").sharedApplication().performSelector("exit");
+			} else {
+			  plus.runtime.quit();
+			}
+		},
+		//同意协议弹窗
+		agreePup() {
+			uni.setStorageSync('agreement', 'agreed'); //已同意协议标识
+			this.agree = 'agreed';
+		},
+		// 清空账号
+		clearAccon() {
+			this.telPhone = '';
+		},
+		agreeJump(event) {
+			if (event == 1) {
+				uni.navigateTo({
+					url: '/pages/statistic/protocol/agree'
+				});
+			} else {
+				uni.navigateTo({
+					url: '/pages/statistic/protocol/personal'
+				});
+			}
+		},
+		/**
+		 * 获取短信验证码
+		 */
+		getVerCodeFun() {
+			let that = this;
+			if (!/^1[34578]\d{9}$/.test(this.telPhone)) {
+				showToast({
+					title: '请输入正确的账号'
+				});
+				return;
+			}
+			if (!this.getVerCodeTieFlag) return; //验证码倒计时是否完成
+			this.times = 60;
+			const timer = setInterval(() => {
+				if (this.times <= 0) {
+					clearInterval(timer);
+					this.getVerCodeTie = '获取验证码';
+					this.getVerCodeTieFlag = true;
+					this.times = 60;
+					return;
+				}
+				this.times--;
+				this.getVerCodeTie = `${this.times}s`;
+				this.getVerCodeTieFlag = false;
+			}, 1000);
+			uni.hideKeyboard();
+			http('post', 'Msg/sendCode', { mobile: this.telPhone }, res => {
+				if (res.code == 200) {
+					that.times = 60;
+				} else if (res.statusCode == 400) {
+					that.times = Number(res.data.replace(/[^\d]/g, ''));
+					that.getVerCodeTieFlag = false;
+					that.getVerCodeFun();
+				} else {
+					clearInterval(timer);
+					that.getVerCodeTieFlag = true;
+					that.getVerCodeTie = '获取验证码';
+					that.times = 60;
+				}
+			});
+		}
+	}
+};
+</script>
+
+<style scoped>
+.login_code {
+	align-items: center;
+}
+.wrap_cover {
+	position: fixed;
+	background-color: rgba(25, 29, 40, 0.5);
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	padding: 100px 40px;
+}
+.popup_box {
+	border-radius: 10px;
+	background-color: #fff;
+	z-index: 999;
+	height: 500px;
+	font-size: 24px;
+}
+.popup_title {
+	align-items: center;
+}
+.title_text {
+	line-height: 50px;
+	font-weight: 500;
+}
+.popup_content_box {
+	height: 400px;
+	color: #ff0000;
+	padding: 0 10px;
+	font-size: 8rpx;
+	height: 400px;
+}
+.popup_content {
+	height: 500px;
+}
+.content_item {
+	line-height: 60px;
+	margin: 5px 0;
+}
+.pop_text {
+	font-size: 10px !important;
+	line-height: 20px;
+}
+.first_row {
+	flex-direction: row;
+	align-items: center;
+}
+.popup_but {
+	position: absolute;
+	bottom: 0;
+	/* 	width:200px; */
+	width: 300%;
+	height: 50px;
+	margin: 0px;
+	flex-wrap: nowrap;
+	padding: 0px;
+}
+.but_item_left {
+	position: absolute;
+	left: 0;
+	bottom: 0;
+	margin: 0px;
+	padding: 0px;
+	width: 150%;
+	height: 50px;
+	align-items: center;
+}
+.but_text_right {
+	color:#4F70ED;
+}
+.but_text_left{
+	color:#999;
+}
+.line {
+	height: 1px;
+	background-color: #f0f0f0;
+}
+.line_tall {
+	height: 50px;
+	width: 1px;
+	background-color: #f0f0f0;
+	position: absolute;
+	left: 149%;
+	bottom: 0;
+}
+.but_item_right {
+	position: absolute;
+	right: 0;
+	bottom: 0;
+	padding: 0px;
+	align-items: center;
+	width: 150%;
+	height: 50px;
+	padding-right:20px;
+}
+.but_text {
+	line-height: 50px;
+	align-items: center;
+	font-size: 14px;
+}
+.agree_jump {
+	color: #0000ff;
+}
+.Adaptive {
+	/* #ifndef APP-NVUE */
+	height: var(--status-bar-height);
+	/* 头部系统栏高度 */
+	background-color: #fff;
+	/* #endif*/
+}
+
+.login_content {
+	flex: 1;
+	background-color: #ffffff;
+	padding-top: 232rpx;
+	align-items: center;
+}
+
+.logo_img {
+	height: 152rpx;
+	width: 196rpx;
+	margin-bottom: 114rpx;
+}
+
+.logo_img_son {
+	width: 196rpx;
+	height: 152rpx;
+}
+
+.getCodeInt {
+	width: 520rpx;
+	margin-bottom: 302rpx;
+}
+
+.account {
+	height: 120rpx;
+	justify-content: space-between;
+	align-items: center;
+	border-bottom-color: #dcdcdc;
+	border-bottom-width: 1px;
+	border-style: solid;
+	flex-direction: row;
+}
+
+.img1 {
+	flex: 1;
+	flex-direction: row;
+	align-items: center;
+}
+
+.img1_son {
+	height: 48rpx;
+	width: 48rpx;
+	margin-right: 34rpx;
+	position: relative;
+	top: 10px;
+}
+
+.center {
+	height: 120rpx;
+	justify-content: space-between;
+	padding-top: 14px;
+	padding-bottom: 6px;
+}
+
+.center_text {
+	font-size: 28rpx;
+	font-weight: 500;
+	color: rgba(0, 0, 0, 1);
+}
+
+.center_int {
+	width: 150px;
+	font-size: 28rpx;
+	color: #000;
+}
+
+.wrapper_pla {
+	font-size: 28rpx;
+	color: #999;
+}
+
+.img2 {
+	height: 64rpx;
+	width: 64rpx;
+	position: relative;
+	top: 14px;
+}
+
+.img2_son {
+	height: 64rpx;
+	width: 64rpx;
+}
+
+.getCode {
+	width: 146rpx;
+	height: 80rpx;
+	background-color: rgba(73, 109, 245, 1);
+	border-radius: 16rpx;
+	align-items: center;
+	justify-content: center;
+}
+
+.getCodeText {
+	font-weight: 500;
+	color: rgba(255, 255, 255, 1);
+	font-size: 24rpx;
+}
+
+.btn_login {
+	width: 480rpx;
+	height: 100rpx;
+	background-color: rgba(73, 109, 245, 1);
+	border-radius: 16px;
+	justify-content: center;
+	align-items: center;
+}
+
+.btn_login_text {
+	font-weight: 600;
+	color: rgba(255, 255, 255, 1);
+	font-size: 32rpx;
+}
+</style>

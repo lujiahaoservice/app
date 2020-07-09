@@ -1,0 +1,114 @@
+<template>
+  <view class="showToast" @click="">
+    <view class="showToast_box">
+      <view class="showToast_content">
+        <text class="showToast_read">是否确定退出</text>
+      </view>
+      <view class="showToast_line"></view>
+      <view class="showToast_double">
+        <text class="showToast_cancel" @click="cancel">取消</text>
+        <view class="center_line"></view>
+        <text class="showToast_sure" @click="sure">确认</text>
+      </view>
+    </view>
+  </view>
+</template>
+
+<script>
+  import http from '@/utils/request'
+  export default {
+    data() {
+      return {
+      }
+    },
+    onLoad() {
+      let that = this
+    },
+    methods: {
+      sure() {
+        let that = this
+        const subNVueSure = uni.getCurrentSubNVue()
+        subNVueSure.hide('slide-out-bottom', 300)
+        uni.removeStorage({
+        	key: 'yq_token'
+        })
+        uni.reLaunch({
+        	url: '/pages/login/login'
+        })
+      },
+      cancel() {
+        const subNVueSure = uni.getCurrentSubNVue()
+        subNVueSure.hide('slide-out-bottom', 300)
+      }
+    }
+  }
+</script>
+
+<style scoped>
+  .showToast {
+    flex: 1;
+    background-color: transparent;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .showToast_box {
+    width: 270px;
+    height: 129px;
+    background-color: #fff;
+    border-radius: 8px;
+  }
+
+  .showToast_content {
+    height: 85px;
+    padding: 24px 16px 17px 16px;
+  }
+
+  .showToast_read {
+    font-size: 14px;
+    color: rgba(51, 51, 51, 1);
+    line-height: 22px;
+    text-align: center;
+  }
+
+  .showToast_dosure {
+    font-size: 14px;
+    color: #496DF5;
+    line-height: 22px;
+    text-align: center;
+  }
+
+  .showToast_line {
+    height: 1px;
+    background-color: rgba(220, 220, 220, 1);
+  }
+
+  .showToast_double {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .showToast_cancel {
+    width: 135px;
+    text-align: center;
+    font-size: 18px;
+    font-weight: 400;
+    color: rgba(153, 153, 153, 1);
+    line-height: 24px;
+  }
+
+  .center_line {
+    width: 1px;
+    height: 44px;
+    background-color: rgba(221, 221, 221, 1);
+  }
+
+  .showToast_sure {
+    width: 134px;
+    text-align: center;
+    font-size: 18px;
+    font-weight: 400;
+    color: #496DF5;
+    line-height: 24px;
+  }
+</style>

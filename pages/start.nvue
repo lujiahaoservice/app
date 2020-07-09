@@ -1,0 +1,46 @@
+<template>
+  <div class="startBox">
+    <image class="startImgLogo" src="../static/startLogo.png" alt="">
+    <image class="startImgCenter" src="../static/startCenter.png" alt="">
+    <image class="startImgText" src="../static/startText.png" alt="">
+  </div>
+</template>
+<script>
+export default {
+  data() {
+    return {
+      
+    }
+  },
+  onLoad() {
+
+  },
+  onShow() {
+  },
+  methods: {
+    
+  }
+}
+</script>
+<style>
+.startBox{
+  flex: 1;
+	align-items: center;
+	justify-content: center;
+	background-color: #fff;
+}
+.startImgLogo{
+  width: 88px;
+	height: 88px;
+}
+.startImgCenter{
+  width: 217px;
+	height: 135px;
+	margin-top: 67px;
+}
+.startImgText{
+  width: 27px;
+	height: 206px;
+	margin-top: 26px;
+}
+</style>

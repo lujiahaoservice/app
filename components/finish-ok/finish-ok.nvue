@@ -1,0 +1,90 @@
+<template>
+  <div class="bindOk">
+    <div class="box">
+      <div class="content_box">
+        <text class="content">{{content}}</text>
+      </div>
+      <div class="sureBtn_box">
+        <text class="sureBtn" @click="sure">确定</text>
+      </div>
+    </div>
+  </div>
+</template>
+<script>
+  export default {
+    data() {
+      return {
+        content: '',
+        goback: Number
+      }
+    },
+	onLoad() {
+	},
+    onShow() {
+		let that = this
+	  uni.$on('submit_finish',function(data){
+        that.content = data.content
+        that.goback = data.goback
+		})
+		
+      const subNVue = uni.getCurrentSubNVue();
+      subNVue.onMessage((res) => {
+        const data = res.data;
+        this.content = data.content
+        this.goback = data.goback
+        // 执行一些操作  
+      });
+    },
+    methods: {
+      sure() {
+        const subNVue = uni.getCurrentSubNVue();
+        subNVue.hide('slide-out-bottom', 300)
+        if(this.goback === 1) {
+          uni.navigateBack({
+             delta: 1
+          });
+        }
+      }
+    }
+  }
+</script>
+<style scoped>
+  .bindOk {
+    flex: 1;
+    background-color: transparent;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .box {
+    width: 270px;
+    background-color: #fff;
+    border-radius: 8px;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 20px;
+  }
+  .content_box{
+    flex-direction: row;
+    justify-content: center;
+    flex-wrap: wrap;
+    padding-top: 24px;
+  }
+  .content{
+    width: 240px;
+    font-size: 14px;
+    flex-wrap: wrap;
+    text-align: center;
+  }
+  .sureBtn{
+    width: 100px;
+    height: 35px;
+    font-size: 14px;
+    border-radius: 8px;
+    line-height: 35px;
+    margin-top: 24px;
+    color: #fff;
+    text-align: center;
+    background-color: #496DF5;
+  }
+</style>

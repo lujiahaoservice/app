@@ -1,0 +1,235 @@
+<template>
+	<div class="withdrawal">
+		<div>
+			<div class="withdrawal_top">
+				<text class="withdrawal_top_text">提现金额</text>
+				<input type="number" class="withdrawal_top_input" v-model="money" placeholder="请输入金额" @input="maxMoney">
+				<div class="withdrawal_top_btn">
+					<text class="withdrawal_top_btn_text" @click="showModal">提现</text>
+				</div>
+			</div>
+			<text class="tip">温馨提示：需手续费1%，提现金额需要10元的正倍数</text>
+		</div>
+		<div class="fullScreen" style="flex: 1;" @click="focused"></div>
+	</div>
+</template>
+<script>
+	import http from '@/utils/request'
+	export default {
+		components: {
+			// popupLayer
+		},
+		data() {
+			return {
+				way: 1,
+				way_flag: false,
+				alipay: '',
+				alipayUsername: '',
+				bankUsername: '',
+				bankCard: '',
+				money: '',
+				banlace: '',
+				ectMoney: Number
+			}
+		},
+		onLoad(options) {
+			this.banlace = options.balance
+		},
+		onShow() {
+			let that = this
+			this.initData()
+			const subNVue = uni.getSubNVueById('withDraw')
+			subNVue.onMessage((res) => {
+				that.money = ''
+				const data = res.data;
+				const subNVueSure = uni.getSubNVueById('sureToast')
+				subNVueSure.show('slide-in-bottom', 300, function () {
+					// 打开后进行一些操作...  
+					//   
+				});
+				subNVueSure.postMessage({
+					content: data.content,
+					goback: 1
+				});
+				// 执行一些操作  
+			})
+		},
+		onHide() {
+
+		},
+		methods: {
+			focused() {
+				uni.hideKeyboard()
+			},
+			maxMoney() {
+				let that = this
+				setTimeout(() => {
+					that.money=that.money.replace(/[^0123456789.]/,"")
+        //防止无输入无限个“.”
+					that.money=that.money.replace(/\.+/ ,".")
+					//在不是“0.”开头的字符进行修改：“01”=>1
+					if(that.money.charAt(0)=="0"&&that.money.charAt(1)!="."&&that.money.length>=2){
+						that.money=that.money.replace(/0/ ,"")
+					}
+					//获取第一个小数点的索引值
+					var index=that.money.indexOf('.')
+					//获取最后一个小数点的索引值
+					var lastIndex=that.money.lastIndexOf('.')
+					//判断小数点是不是开头，如果是开头，则去除
+					if(index==0){
+						that.money=that.money.replace(/\./ ,"")
+					}
+					//只允许小数点后面有2位字符
+					if(index>=1){
+						that.money=that.money.substring(0,index+3)          
+					}
+					//防止小数点后面又出现小数点
+					if(index!=lastIndex){
+						that.money=that.money.substring(0,index+2) 
+					}
+					if(that.money > that.banlace) {
+						that.money = that.banlace
+					}
+				}, 0)
+			},
+			// 获取提现状态
+			initData() {
+				http('get', 'clientUser/account', {}, res => {
+					if (res.code == 200) {
+						let data = res.data
+						this.alipay = data.alipay
+						this.alipayUsername = data.alipayUsername
+						this.bankUsername = data.bankUsername
+						this.bankCard = data.bankCard
+					}
+				})
+			},
+			// 选择绑定方式
+			choiceWay(type) {
+				this.way = type
+				switch (type) {
+					case 1:
+						uni.navigateTo({
+							url: '/pages/statistic/mine/bindAli'
+						})
+						break;
+				}
+			},
+			//打开遮罩层
+			showModal() {
+				let that = this
+				uni.hideKeyboard()
+				// this.way_flag = true
+				if (Number(that.money) > Number(that.banlace)) {
+					uni.showToast({
+						title: '您的账户余额不足',
+						icon: 'none'
+					})
+					return
+				}
+				if (!that.money) { 
+					uni.showToast({
+						title: '提现金额不能为空',
+						icon: 'none'
+					})
+					return
+				}
+				if(!(/(^[1-9]\d*(\.\d{1,2})?$)|(^0(\.\d{1,2})?$)/.test(that.money))) {
+					uni.showToast({
+						title: '请输入正确的金额',
+						icon: 'none'
+					})
+					return
+				}
+				if (that.money % 10 != 0) {
+					uni.showToast({
+						title: '提现金额需要10元的正倍数',
+						icon: 'none'
+					})
+					return
+				}
+				const subNVue1 = uni.getSubNVueById('withDraw')
+				// 打开 nvue 子窗体  
+				subNVue1.show('slide-in-bottom', 300, function () {
+					// 打开后进行一些操作...  
+					//   
+				});
+				subNVue1.postMessage({
+					alipay: this.alipay,
+					alipayUsername: this.alipayUsername,
+					bankUsername: this.bankUsername,
+					bankCard: this.bankCard,
+					money: this.money * 100
+				})
+			},
+			cancelShowModal() {
+				// this.way_flag = false
+			}
+		},
+		onNavigationBarButtonTap: function onNavigationBarButtonTap(e) {
+			uni.navigateBack({
+				delta: 1
+			});
+		}
+	}                                                                                                    
+</script>
+<style>
+	.withdrawal {
+		background-color: #f6f6f6;
+		padding-top: 1px;
+		flex: 1;
+	}
+
+	.withdrawal_top {
+		flex-direction: row;
+		padding: 0 20px;
+		height: 53px;
+		align-items: center;
+		justify-content: space-between;
+		background-color: #fff;
+	}
+	.tip{
+		font-size:10px;
+		font-weight:400;
+		color:rgba(0,0,0,1);
+		line-height:14px;
+		text-align: center;
+		margin-top: 11px;
+	}
+	.withdrawal_top_text {
+		font-size: 14px;
+		font-weight: 400;
+		color: rgba(0, 0, 0, 1);
+	}
+
+	.withdrawal_top_input {
+		font-size: 14px;
+		padding-left: 10px;
+		width: 200px;
+	}
+
+	.withdrawal_top_btn {
+		width: 60px;
+		text-align: center;
+		height: 30px;
+		font-size: 14px;
+		background-color: rgba(73, 109, 245, 1);
+		box-shadow: 0px 2px 4px 0px rgba(220, 225, 244, 0.6);
+		border-radius: 8px;
+	}
+
+	.withdrawal_top_btn_text {
+		color: #fff;
+		font-size: 14px;
+		line-height: 30px;
+		text-align: center;
+	}
+
+	.withdrawal_notice {
+		margin-top: 11px;
+		text-align: center;
+		font-size: 10px;
+		font-weight: 400;
+		color: rgba(0, 0, 0, 1);
+	}
+</style>

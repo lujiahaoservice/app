@@ -1,0 +1,133 @@
+<template>
+  <scroll-view scroll-y="true" show-scrollbar="false" class="s_notice" style="flex: 1">
+    <view class="notice_single" v-for="(item,index) in noticeList" :key="index">
+      <view class="notice_top">
+        <div class="s_notice_flex">
+          <text class="notice_new">{{item.noticeType === 1 ? '实名认证' : (item.noticeType == 2 ? '任务审核' : (item.noticeType == 3 ? '开通会员' : (item.noticeType == 4 ? '提现' : (item.noticeType == 5 ? '完成通知' : '系统通知'))))}}</text>
+          <text class="s_notice_span" v-if="item.isNew"></text>
+        </div>
+        <text class="notice_date" style="font-size: 14px">{{item.created}}</text>
+      </view>
+      <text class="notice_content">{{item.content}}</text>
+    </view>
+  </scroll-view>
+</template>
+
+<script>
+  import http from '@/utils/request'
+  import { friendlyDate } from '@/utils/util'
+  export default {
+    data() {
+      return {
+        pageNum: 1,
+        pageSize: 10,
+        pages: 0,
+        noticeList: []
+      };
+    },
+    onLoad() { 
+      
+    },
+    onShow() {
+      this.initData(false)
+    },
+    onHide() {
+      
+    },
+    methods: {
+      initData(e) {
+        let that = this
+        const data = {
+          pageSize: this.pageSize,
+          pageNum: this.pageNum
+        }
+        http('get', 'notice/page', data, res => {
+          if (res.code == 200) {
+            let msg = res.data.records
+            msg = msg.map((news) => {
+              return {
+                created: friendlyDate(new Date(news.created.replace(/\-/g, '/')).getTime()),
+                noticeId: news.noticeId,
+                noticeType: news.noticeType,
+                content: news.content,
+                isNew: 1
+              };
+            });
+            if (e) {
+              let newList = that.noticeList.concat(msg)
+              that.noticeList = newList
+            } else {
+              that.noticeList = msg
+            }
+            that.pages = res.data.pages
+          }
+        })
+      }
+    },
+    onNavigationBarButtonTap: function onNavigationBarButtonTap(e) {
+      uni.navigateBack({
+        delta: 1
+      });
+    },
+    onPullDownRefresh() {
+      this.pageNum = 1
+      this.initData(false)
+      uni.stopPullDownRefresh();
+    },
+    onReachBottom() {
+      if (this.pageNum < this.pages) {
+        this.pageNum += 1
+        this.initData(true)
+      }
+    }
+  }
+</script>
+
+<style scoped>
+  .s_notice {
+	  flex:1;
+	  background-color: #fff;
+    font-size: 28rpx;
+    padding: 0 22rpx;
+  }
+
+  .notice_single {
+    padding: 40rpx 18rpx 18rpx;
+    border-bottom-width: 1px;
+    border-style: solid;
+    border-color: #dcdcdc;
+  }
+
+  .notice_top {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .s_notice_flex {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .notice_new {
+    font-size: 14px;
+    font-weight: bold;
+    color: rgba(0, 0, 0, 1);
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .s_notice_span {
+    height: 12rpx;
+    width: 12rpx;
+    border-radius: 50%;
+    background-color: #ff0000;
+    margin-left: 20rpx;
+  }
+
+  .notice_content {
+    margin-top: 10rpx;
+    font-size: 24rpx;
+    line-height: 34rpx;
+  }
+</style>

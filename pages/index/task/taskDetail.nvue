@@ -1,0 +1,1028 @@
+<template>
+	<div class="taskDetail" v-if="feedMsg != ''">
+		<scroll-view scroll-y=true show-scrollbar=false class="taskDetail_box" @click="focused" v-if="taskDetail.taskId">
+			<div :style="{marginBottom: status == 1 || taskDetail.status == 7 || (status !== 1 && (from == 1 && taskDetail.status > 8)) || (status !== 1 && (from == 2 && taskDetail.status > 8)) ? '0' : '70px' }">
+				<!-- steps -->
+				<div class="steps_" v-if="steps && taskDetail.status > 2 && taskDetail.status != 7">
+					<uni-steps :options="steps.steps" :active="steps.step" active-color="#496DF5"></uni-steps>
+				</div>
+				<!-- 基础信息 -->
+				<div class="basic_info">
+					<div class="basic_left">
+						<image class="basci_img" mode="aspectFill" :src="taskDetail.userPhoto" alt="">
+							<div>
+								<text class="basic_name">{{taskDetail.username}}</text>
+							</div>
+					</div>
+					<div class="basic_right">
+						<text class="basic_price">{{(taskDetail.money / 100).toFixed(2)}}元</text>
+						<text class="basic_time">{{taskDetail.created}}</text>
+					</div>
+				</div>
+				<!-- 任务类型 + 任务标题 + 任务详情 -->
+				<div class="task_type">
+					<text class="task_type_text_1">任务类型</text>
+					<text class="task_type_text_2">{{taskDetail.pcategoryName}}</text> 
+					<text class="task_type_text_3">{{taskDetail.categoryName}}</text>
+				</div>
+				<div class="task_titAndDetail">
+					<div class="task_tit">
+						<text class="task_tit_text_1">任务标题</text>
+						<text class="task_tit_text_2" @longpress="copyText(taskDetail.title)">{{taskDetail.title}}</text>
+					</div>
+					<div class="task_detail">
+						<text class="task_detail_text_1">任务详情</text>
+						<text class="task_detail_text_2" @longpress="copyText(taskDetail.detail)">{{taskDetail.detail}}</text>
+					</div>
+				</div>
+				<!-- 三张图片 -->
+				<scroll-view class="task_scroll_box" scroll-x="true" show-scrollbar="true" v-if="taskDetail.images.length > 0">
+					<block class="task_scroll">
+						<image mode="aspectFill" @click="seePhoto(item)" v-for="(item, index) in taskDetail.images" :src="item"
+							:key="index" alt="" class="task_scroll_img">
+						</image>
+					</block>
+				</scroll-view>
+				<!-- 完成时间1 -->
+				<div class="task_finish_box">
+					<div class="task_finish_time common_time" @click="to_taskFinish(taskDetail.taskId)">
+						<text class="task_finish_time_l">完成时间</text>
+						<text class="task_finish_time_r">{{taskDetail.completeTime}}</text>
+					</div>
+					<div class="task_finish_address common_time">
+						<div class="task_flex_it">
+							<text class="task_finish_time_l">发布地点</text>
+							<div>
+								<text class="task_finish_time_r" :style="{width: status === 3 ? systemWidth : systemWidth2}">{{taskDetail.province + ' ' + taskDetail.city + ' ' + taskDetail.district + ' ' + taskDetail.publishPlace}}</text>
+							</div>
+						</div>
+						<image class="task_finish_img" v-if="from === 1" src="/static/home/position.png"
+							@click="openMap(taskDetail.lng, taskDetail.lat)">
+					</div>
+					<div class="task_finish_address common_time" v-if="status === 1 && taskDetail.completePlace">
+						<div class="task_flex_it">
+							<text class="task_finish_time_l">完成地点</text>
+							<text class="task_finish_time_r"
+								:style="{width: status === 3 ? systemWidth : systemWidth2}">{{taskDetail.completeProvince + ' ' + taskDetail.completeCity + ' ' + taskDetail.completeDistrict + ' ' + taskDetail.completePlace}}</text>
+						</div>
+						<image v-if="from === 1" src="/static/home/position.png" class="task_finish_img">
+					</div>
+					<div class="task_finish_phone common_time" v-if="status !== 1">
+						<div class="task_flex_it">
+							<text class="task_finish_time_l">联系电话</text>
+							<text class="task_finish_time_r"
+								:style="{width: status === 2 ? '180px' : ''}">{{taskDetail.proPhone}}</text>
+						</div>
+						<image @click="callMobile(taskDetail.proPhone)" class="task_finish_img" v-if="from === 1"
+							src="/static/home/phone.png">
+							<text v-if="from === 2" class="taskDetail_only">仅接单者可见</text>
+					</div>
+				</div>
+				<!-- 完成时间2 -->
+				<div class="task_finish_box common_task_finish_box" v-if="status !== 1 && taskDetail.pcategoryName == '跑腿任务'">
+					<div class="task_finish_address common_time">
+						<div class="task_flex_it">
+							<text class="task_finish_time_l">完成地点</text>
+							<text class="task_finish_time_r" :style="{width: status === 3 ? 'systemWidth' : systemWidth2}">{{taskDetail.completeProvince + ' ' + taskDetail.completeCity + ' ' + taskDetail.completeDistrict + ' ' + taskDetail.completePlace}}</text>
+						</div>
+						<image v-if="from === 1" src="/static/home/position.png"
+							@click="openMap(taskDetail.completeLng, taskDetail.completeLat)" class="task_finish_img">
+					</div>
+					<div class="task_finish_phone common_time">
+						<div class="task_flex_it">
+							<text class="task_finish_time_l">联系电话</text>
+							<text class="task_finish_time_r" :style="{width: status === 2 ? '180px' : ''}">{{taskDetail.comPhone}}</text>
+						</div>
+						<image @click="callMobile(taskDetail.comPhone)" v-if="from === 1" src="/static/home/phone.png"
+							class="task_finish_img">
+							<text v-if="from === 2" class="taskDetail_only">仅接单者可见</text>
+					</div>
+				</div>
+				<div class="takeOrder" v-if="taskDetail.executor != ''">
+					<div class="task_flex_it">
+						<image class="takeOrder_ava" :src="taskDetail.executorPhoto" alt="">
+							<div class="takeOrder_people">
+								<text class="takeOrder_peopleTitle">接单者</text>
+								<text class="takeOrder_peopleName">{{taskDetail.executorNickname}}</text>
+							</div>
+					</div>
+					<div class="task_flex_it">
+						<text class="takeOrder_mobile">{{taskDetail.executorPhone}}</text>
+						<image class="takeOrder_img" @click="callMobile(taskDetail.executorPhone)" src="/static/home/phone.png"
+							alt="">
+					</div>
+				</div>
+				<div class="task_feed_one" v-if="(taskDetail.status >= 4 && taskDetail.status < 6) || taskDetail.status == 9 || taskDetail.status == 10">
+					<text class="task_feed_one_title">验收信息</text>
+					<text class="task_feed_one_msg">{{taskDetail.finishDesc}}</text>
+					<div class="task_feed_one_list">
+						<image class="task_feed_one_img" @click="seePhoto(item)" v-for="(item, index) in taskDetail.finishImages"
+							:key="index" :style="{marginRight: index === 3 ? '0' : '35px'}" :src="item" alt="">
+					</div>
+				</div>
+				<div class="task_feed_one" v-if="feedMsg.user.details != '' && feedMsg.executor.details != ''">
+					<div class="task_feed_status">
+						<text class="task_feed_one_title">{{feedMsg.user.commentator}}</text>
+						<image class="task_feed_star" src="/static/liang.png" alt="" v-for="(val, i) in feedMsg.user.stars" :key="index">
+							<image class="task_feed_star" src="/static/an.png" alt="" v-for="(val, i) in (5 - feedMsg.user.stars)" :key="index">
+					</div>
+					<text class="task_feed_one_msg">{{feedMsg.user.details}}</text>
+					<div class="task_feed_one_list" v-if="false">
+						<image class="task_feed_one_img" v-for="(item, index) in 4" :key="index"
+							:style="{marginRight: index === 3 ? '0' : '35px'}"
+							src="https://ss0.bdstatic.com/94oJfD_bAAcT8t7mm9GUKT-xh_/timg?image&quality=100&size=b4000_4000&sec=1578290832&di=6b6f1d67ff3f1253a1d1659452c9aa9a&src=http://b-ssl.duitang.com/uploads/item/201505/07/20150507214556_JYinM.thumb.1000_0.jpeg"
+							alt="">
+					</div>
+				</div>
+				<div class="task_feed_one" v-if="feedMsg.user.details != '' && feedMsg.executor.details != ''">
+					<div class="task_feed_status">
+						<text class="task_feed_one_title">{{feedMsg.executor.commentator}}</text>
+						<image class="task_feed_star" src="/static/liang.png" alt="" v-for="(val, i) in feedMsg.executor.stars" :key="index">
+							<image class="task_feed_star" src="/static/an.png" alt="" v-for="(val, i) in (5 - feedMsg.executor.stars)" :key="index">
+					</div>
+					<text class="task_feed_one_msg">{{feedMsg.executor.details}}</text>
+					<div class="task_feed_one_list" v-if="false">
+						<image class="task_feed_one_img" v-for="(item, index) in 4" :key="index"
+							:style="{marginRight: index === 3 ? '0' : '35px'}"
+							src="https://ss0.bdstatic.com/94oJfD_bAAcT8t7mm9GUKT-xh_/timg?image&quality=100&size=b4000_4000&sec=1578290832&di=6b6f1d67ff3f1253a1d1659452c9aa9a&src=http://b-ssl.duitang.com/uploads/item/201505/07/20150507214556_JYinM.thumb.1000_0.jpeg"
+							alt="">
+					</div>
+				</div>
+				<div class="addAction_Btn" v-if="status === 1">
+					<text class="addAction_pubBtn" @click="showModal">接单</text>
+					<div class="addAction_agreement" @click="hadread = !hadread">
+						<image class="addAction_agreement_img" src="/static/mineImg/mine_annius.png" alt="" v-if="hadread">
+							<image class="addAction_agreement_img" src="/static/mineImg/mine_anniu.png" alt="" v-else>
+								<text class="addAction_text">我已认真阅读并同意</text><text class="addAction_textCl" @click="toProtocol">《接单协议》</text>
+					</div>
+				</div>
+				<!-- 底部 -->
+				<div class="task_bottom" v-if="(status !== 1 && (from == 1 && taskDetail.status <= 9 && taskDetail.status != 7)) || (status !== 1 && (from == 2 && taskDetail.status <= 9 && taskDetail.status != 7))">
+					<div></div>
+					<div class="task_bottom_flex">
+						<text class="task_bottom_evaluate" @click="to_taskFeed(taskDetail)" v-if="from == 1 && feedMsg.executor.details == ''"
+							:style="{borderColor: (taskDetail.status == 5 || taskDetail.status == 7 || taskDetail.status == 9 || taskDetail.status == 10) && feedMsg.executor.details == '' ? '#496DF5' : '#AAAAAA',backgroundColor: (taskDetail.status == 5 || taskDetail.status == 7 || taskDetail.status == 9 || taskDetail.status == 10) && feedMsg.executor.details == '' ? '#496DF5' : '#fff',color: (taskDetail.status == 5 || taskDetail.status == 7 || taskDetail.status == 9 || taskDetail.status == 10) && feedMsg.executor.details == '' ? '#fff' : '#AAAAAA'}">评价</text>
+						<text class="task_bottom_evaluate" @click="to_taskFeed(taskDetail)" v-if="from == 2 && feedMsg.user.details == ''"
+							:style="{borderColor: (taskDetail.status == 5 || taskDetail.status == 7 || taskDetail.status == 9 || taskDetail.status == 10) && feedMsg.user.details == '' ? '#496DF5' : '#AAAAAA',backgroundColor: (taskDetail.status == 5 || taskDetail.status == 7 || taskDetail.status == 9 || taskDetail.status == 10) && feedMsg.user.details == '' ? '#496DF5' : '#fff',color: (taskDetail.status == 5 || taskDetail.status == 7 || taskDetail.status == 9 || taskDetail.status == 10) && feedMsg.user.details == '' ? '#fff' : '#AAAAAA'}">评价</text>
+						<text class="task_bottom_sure"
+							:style="{borderColor: taskDetail.status == 4 ? '#496DF5' : '#AAAAAA',backgroundColor: taskDetail.status == 4 ? '#496DF5' : '#fff',color: taskDetail.status == 4 ? '#fff' : '#AAAAAA'}"
+							v-if="from == 2" @click="completeTask">确认验收</text>
+						<text class="task_bottom_done" v-if="from == 1" @click="to_taskFinish(taskDetail.taskId)"
+							:style="{borderColor: (taskDetail.status == 3 || taskDetail.status == 1) ? '#496DF5' : '#AAAAAA',backgroundColor:(taskDetail.status == 3 || taskDetail.status == 1) ? '#496DF5' : '#fff',color: (taskDetail.status == 3 || taskDetail.status == 1) ? '#fff' : '#AAAAAA'}">提交完成</text>
+						<text class="task_bottom_cancelOrder" @click="cancelOrder"
+							:style="{borderColor: taskDetail.status >= 4 ? '#AAAAAA' : '#496DF5',backgroundColor: taskDetail.status >= 4 ? '#fff' : '#496DF5',color: taskDetail.status >= 4 ? '#AAAAAA' : '#fff'}">取消订单</text>
+					</div>
+				</div>
+			</div>
+			<!-- <showToast></showToast> -->
+		</scroll-view>
+	</div>
+</template>
+
+<script>
+	import uniSteps from '@/components/uni-steps/uni-steps'
+	import http from '@/utils/request'
+	import { friendlyDate } from "@/utils/util";
+	import { mapState, mapMutations } from 'vuex'
+	import clipboard from "@/js_sdk/dc-clipboard/clipboard.js"
+	export default {
+		components: {
+			uniSteps
+		},
+		data() {
+			return {
+				star: 3,
+				steps: '',
+				stepStatus: '',
+				hadread: false,
+				status: 2,
+				taskId: 0,
+				taskDetail: '',
+				orderId: '',
+				task: false,
+				from: Number,
+				feedMsg: '',
+				feeConfigureId: Number,
+				systemWidth: '',
+				systemWidth2: '',
+				hasClick: 0,
+				clickIndex: -1
+			}
+		},
+		computed: {
+			...mapState(['sub_success'])
+		},
+		watch: {
+			taskId(val) {
+				this.initData(val, 'task/detail', false)
+				this.task = false
+			}
+		},
+		onLoad(e) {
+			let that = this
+			if (e.id) {
+				this.taskId = Number(e.id)
+			}
+			if (e.from) {
+				this.from = Number(e.from)
+				if(e.from == 1) {
+					this.status = 3
+				}
+			}
+			if (e.clickIndex) {
+				this.clickIndex = e.clickIndex
+			}
+			if (e.status) {
+				this.status = Number(e.status)
+			}
+		},
+		onShow() {
+			let that = this
+			let systemWidth = uni.getSystemInfoSync();
+			this.systemWidth = systemWidth.windowWidth - 160 + 'px'
+			this.systemWidth2 = systemWidth.windowWidth - 100 + 'px'
+			that.judgeVip() // 判断开没开会员
+			const subNVue = uni.getSubNVueById('showToast')
+			const subNVueSure = uni.getSubNVueById('sureToast')
+			const subNVueCancel = uni.getSubNVueById('cancelOrder')
+			subNVue.onMessage(res => {
+				if (res.data.content) {
+					subNVueSure.postMessage({
+						content: res.data.content
+					})
+					// 打开 nvue 子窗体
+					subNVueSure.show('slide-in-bottom', 300, function () {
+						// 打开后进行一些操作...  
+						//   
+					})
+					if (res.data.content == '接单成功') {
+						that.status = 3
+						that.from = 1
+						that.initData(that.taskId, 'task/detail', false)
+					}
+				}
+				if(res.data.refresh) {
+					that.initData(that.taskId, 'task/detail', false)
+				}
+				if (res.data.taskId) {
+					that.status = 2
+					that.taskId = res.data.taskId
+					that.from = 1
+					// that.initData(res.data.taskId, 'task/detail', false)
+				}
+			})
+			subNVueCancel.onMessage(res => {
+				if (res.data.success == 1) {
+					subNVueSure.postMessage({
+						content: '订单取消成功'
+					})
+					// 打开 nvue 子窗体  
+					subNVueSure.show('slide-in-bottom', 300, function () {
+						// 打开后进行一些操作...  
+						//   
+					})
+					// that.initData(that.taskId, 'task/detail', false)
+				} else if (res.data.success == 2) {
+					subNVueSure.postMessage({
+						content: '申请取消订单成功,请等待审核'
+					})
+					// 打开 nvue 子窗体  
+					subNVueSure.show('slide-in-bottom', 300, function () {
+						// 打开后进行一些操作...  
+						//   
+					})
+					// that.initData(that.taskId, 'task/detail', false)
+				}
+			})
+			if (this.sub_success == 1) {
+				// that.initData(that.taskId, 'task/detail', false)
+				that.status = 3
+				that.subSuccess(0)
+			}
+			that.initData(that.taskId, 'task/detail', false)
+		},
+		methods: {
+			toProtocol() {
+				uni.navigateTo({
+					 url: '/pages/statistic/protocol/get'
+				})
+			},
+			// 判断有没有开会员
+			judgeVip() {
+				let that = this
+				http('get', 'clientUser/detail', {}, res => {
+					if(res.code == 200) {
+						that.feeConfigureId = res.data.feeConfigureId
+					}
+				})
+			},
+			focused() {
+				uni.hideKeyboard()
+			},
+			...mapMutations(['subSuccess']),
+			showModal() {
+				let that = this
+				if(that.feeConfigureId == 0) {
+					uni.showToast({
+						title: '您还没有开通会员，正在跳转中...',
+						icon: 'none',
+						success: () => {
+							uni.navigateTo({
+								url: '/pages/statistic/mine/vipAuth'
+							})
+						}
+					})
+					return
+				}
+				const subNVue = uni.getSubNVueById('showToast')
+				const subNVueSure = uni.getSubNVueById('sureToast')
+				if (this.hadread) {
+					// 打开 nvue 子窗体  
+					subNVue.show('slide-in-bottom', 300, function () {
+						// 打开后进行一些操作...  
+					});
+					uni.$emit('receive',{
+						taskId: that.taskId,
+						clickIndex: that.clickIndex,
+						taskAmount: that.taskDetail.taskAmount || '',
+						platformPumping: that.taskDetail.platformPumping || '',
+					})
+					
+					// subNVue.postMessage({
+					// 	taskId: that.taskId,
+					// 	clickIndex: that.clickIndex,
+					// 	taskAmount: that.taskDetail.taskAmount || '',
+					// 	platformPumping: that.taskDetail.platformPumping || '',
+					// })
+				} else {
+					// 打开 nvue 子窗体  
+					subNVueSure.show('slide-in-bottom', 300, function () {
+					})
+					// uni.$emit('bank',{content: '请阅读并同意《接单协议》'})
+					 uni.$emit('getAgree',{msg: '请阅读并同意《接单协议》'})
+					// subNVueSure.postMessage({
+					// 	content: '请阅读并同意《接单协议》'
+					// })
+				}
+			},
+			// 获取任务详情
+			initData(id, url, e) {
+				let that = this
+				let data = {
+					id: id
+				}
+				if(this.hasClick != 0) return
+				this.hasClick = 1
+				uni.showLoading();
+				setTimeout(() => {
+					http('get', url, data, res => {
+						if (res.code == 200) {
+							if(res.data.step) {
+								that.steps = JSON.parse(res.data.step)
+								that.steps.steps = JSON.parse(that.steps.steps)
+							}
+							if (res.data.images) {
+								res.data.images = JSON.parse(res.data.images)
+							}
+							if (res.data.finishImages) {
+								res.data.finishImages = JSON.parse(res.data.finishImages)
+							}
+							res.data.created = friendlyDate(
+								new Date(res.data.created.replace(/\-/g, "/")).getTime()
+							)
+							that.taskDetail = res.data
+							this.getFeed()
+						}
+					})
+				}, 300)
+				setTimeout(() => {
+					that.hasClick = 0
+				}, 600);
+			},
+			// 复制文本
+			copyText(t) {
+				clipboard.setText(t);
+				uni.showToast({
+					title: '复制成功',
+					duration: 2000,
+					icon: 'none'
+				});
+			},
+			// 拨打电话
+			callMobile(phoneNumber) {
+				uni.makePhoneCall({
+					phoneNumber
+				})
+			},
+			// 打开地图
+			openMap(lng, lat) {
+				uni.openLocation({
+					latitude: Number(lat),
+					longitude: Number(lng)
+				})
+			},
+			// 查看图片
+			seePhoto(p) {
+				uni.previewImage({
+					urls: [p]
+				})
+			},
+			//前往评价
+			to_taskFeed(e) {
+				let that = this
+				// let msg = JSON.stringify(e)
+				if ((e.status != 5 && e.status != 7 && e.status != 9 && e.status != 10) || (that.feedMsg.user.details != '' && that.feedMsg.executor.details != '') || that.steps == '') {
+					return
+				}
+				uni.navigateTo({
+					url: `/pages/index/task/taskFeed?userPhoto=${e.userPhoto}&executorPhoto=${e.executorPhoto}&username=${e.username}&executor=${e.executorNickname}&taskId=${e.taskId}&from=${that.from}`
+				})
+			},
+			// 提交完成
+			to_taskFinish(id) {
+				if (this.taskDetail.status != 3 && this.taskDetail.status != 1) {
+					return
+				}
+				uni.navigateTo({
+					url: `/pages/index/task/taskFinish?taskId=${id}`
+				})
+			},
+			// 获取评论
+			getFeed() {
+				let that = this
+				http('get', 'taskOrderComment/list', { orderId: that.taskDetail.taskId }, res => {
+					if (res.code == 200) {
+						that.feedMsg = res.data
+						uni.hideLoading();
+					}
+				})
+			},
+			// 确认验收
+			completeTask() {
+				let that = this
+				if (that.taskDetail.status != 4) {
+					return
+				}
+
+				let data = {
+					taskId: that.taskDetail.taskId
+				}
+
+				uni.showModal({
+					content: '是否确认验收',
+					success: function (res) {
+						if (res.confirm) {
+							http('put', 'taskOrder/check', data, res => {
+								if (res.code == 200) {
+									uni.showToast({
+										title: '验收完成',
+										duration: 2000
+									});
+									that.initData(that.taskId, 'task/detail', false)
+
+								// subNVue.hide('slide-out-bottom', 300)
+								// this.sureGet = 0
+								}
+							})
+						} else if (res.cancel) {
+							console.log('用户点击取消');
+						}
+					}
+				});
+				
+				// const subNVue = uni.getSubNVueById('showToast')
+				// 打开 nvue 子窗
+				
+				// uni.$emit('update',{sureGet: 1, sureId: that.taskDetail.taskId})
+				// subNVue.postMessage({
+				// 	sureGet: 1,
+				// 	sureId: that.taskDetail.taskId
+				// })
+				// subNVue.show('slide-in-bottom', 300, function () {
+				// 	// 打开后进行一些操作2...  
+				// });
+				// this.initData(this.taskId, 'task/detail', false)
+			},
+			cancelOrder() {
+				let that = this
+				if (that.taskDetail.status >= 4) {
+					return
+				}
+				let status = 0
+				if (that.taskDetail.status == 0 || that.taskDetail.status == 1 || that.taskDetail.status == 2) {
+					status = 1
+				}
+				const subNVue = uni.getSubNVueById('cancelOrder')
+				// 打开 nvue 子窗体
+				subNVue.show('slide-in-bottom', 300, function () {
+					// 打开后进行一些操2作...  
+					//   
+				});
+				
+				uni.$emit('cancel_receive_task',{
+					from: that.from,
+					taskId: that.taskDetail.taskId,
+					status: status
+				})
+				// subNVue.postMessage({
+				// 	from: that.from,
+				// 	taskId: that.taskDetail.taskId,
+				// 	status: status
+				// })
+			}
+		},
+		onPullDownRefresh() {
+			this.initData(this.taskId, 'task/detail', false)
+			uni.stopPullDownRefresh();
+		},
+		onNavigationBarButtonTap: function onNavigationBarButtonTap(e) {
+			uni.navigateBack({
+				delta: 1
+			});
+		}
+	}
+</script>
+
+<style scoped>
+	.taskDetail {
+		padding-bottom:60px;
+		flex: 1;
+		position: relative;
+		background-color: #F6F6F6;
+	}
+
+	.taskDetail_box {
+		flex: 1;
+		background-color: #F6F6F6;
+	}
+
+	/* steps */
+	.steps_ {
+		height: 100px;
+		background-color: #fff;
+		padding-top: 20px;
+		border-top-width: 1px;
+		border-top-style: solid;
+		border-top-color: #F3F3F3;
+	}
+
+	/* 基础信息 */
+	.basic_info {
+		height: 80px;
+		padding-left: 12px;
+		padding-right: 18px;
+		background-color: rgba(255, 255, 255, 1);
+		border-top-width: 1px;
+		border-top-style: solid;
+		border-top-color: #F3F3F3;
+		flex-direction: row;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 5px;
+	}
+
+	.basic_left {
+		align-items: center;
+		flex-direction: row;
+	}
+
+	.basci_img {
+		width: 60px;
+		height: 60px;
+		border-radius: 50%;
+		margin-right: 14px;
+	}
+
+	.basic_name {
+		font-size: 14px;
+		font-weight: 600;
+		color: rgba(0, 0, 0, 1);
+	}
+
+	.basic_right {
+		height: 41px;
+		align-items: center;
+		justify-content: space-between;
+	}
+
+	.basic_price {
+		font-size: 10px;
+		font-weight: 600;
+		color: rgba(214, 10, 10, 1);
+		line-height: 14px;
+	}
+
+	.basic_time {
+		font-size: 10px;
+		font-weight: 400;
+		color: rgba(0, 0, 0, 1);
+		line-height: 14px;
+	}
+
+	/* 任务类型 + 任务标题 + 任务详情 */
+
+	.task_type {
+		height: 60px;
+		background-color: rgba(255, 255, 255, 1);
+		flex-direction: row;
+		align-items: center;
+		padding-left: 18px;
+		margin-bottom: 5px;
+	}
+
+	.task_type_text_1 {
+		font-size: 14px;
+		color: rgba(170, 170, 170, 1);
+		margin-right: 21px;
+	}
+
+	.task_type_text_2 {
+		font-size: 14px;
+		color: rgba(73, 109, 245, 1);
+		margin-right: 22px;
+	}
+
+	.task_type_text_3 {
+		padding: 0 25px;
+		height: 30px;
+		border-radius: 8px;
+		border-width: 1px;
+		border-style: solid;
+		border-color: rgba(73, 109, 245, 1);
+		font-size: 14px;
+		color: rgba(73, 109, 245, 1);
+		line-height: 30px;
+		text-align: center;
+	}
+
+	.task_titAndDetail {
+		padding-left: 15px;
+		padding-right: 15px;
+		background-color: #fff;
+		margin-bottom: 5px;
+	}
+
+	/* 三张图片 */
+	.task_scroll_box {
+		width: 750rpx;
+		height: 200rpx;
+		background-color: rgba(255, 255, 255, 1);
+	}
+
+	.task_scroll {
+		width: 690rpx;
+		height: 200rpx;
+		padding-left: 15px;
+		padding-right: 15px;
+		background-color: rgba(255, 255, 255, 1);
+		flex-direction: row;
+		align-items: center;
+	}
+
+	.task_scroll_img {
+		width: 120rpx;
+		height: 120rpx;
+		margin-right: 35px;
+	}
+
+	/* 完成时间 */
+	.task_finish_box {
+		width: 750rpx;
+		background-color: rgba(255, 255, 255, 1);
+		margin-top: 5px;
+		/* border-width: 1px; */
+	}
+
+	.common_time {
+		flex-direction: row;
+		align-items: center;
+		margin-left: 30rpx;
+		margin-right: 30rpx;
+	}
+
+	.common_task_finish_box {
+		height: 272rpx;
+	}
+
+	.task_finish_time {
+		height: 126rpx;
+		border-bottom-width: 1px;
+		border-style: solid;
+		border-color: #F1F1F1;
+	}
+
+	.task_finish_address {
+		height: 134rpx;
+		border-bottom-width: 1px;
+		border-style: solid;
+		border-color: #F1F1F1;
+		justify-content: space-between;
+	}
+
+	.task_flex_it {
+		flex-direction: row;
+		align-items: center;
+	}
+
+	.task_finish_phone {
+		height: 120rpx;
+		justify-content: space-between;
+	}
+
+	.task_finish_time_l {
+		width: 140rpx;
+		font-size: 14px;
+		font-weight: 400;
+		color: rgba(170, 170, 170, 1);
+		padding-left: 3px;
+		/* line-height:20px; */
+	}
+
+	.task_finish_time_r {
+		font-size: 14px;
+		font-weight: 400;
+		color: rgba(0, 0, 0, 1);
+		margin-left: 10px;
+		/* line-height:20px; */
+	}
+
+	.task_finish_img {
+		width: 80rpx;
+		height: 80rpx;
+	}
+
+	/* task_bottom */
+	.task_bottom {
+		position: fixed;
+		bottom: 0;
+		width: 750rpx;
+		height: 120rpx;
+		background-color: rgba(255, 255, 255, 1);
+		border-style: solid;
+		border-top-width: 1px;
+		border-color: rgba(221, 221, 221, 1);
+	}
+
+	/*  */
+	.task_tit {
+		height: 60px;
+		border-bottom-width: 1px;
+		border-bottom-style: solid;
+		border-bottom-color: #F3F3F3;
+		flex-direction: row;
+		align-items: center;
+	}
+
+	.task_tit_text_1 {
+		font-size: 14px;
+		color: #AAAAAA;
+		margin-right: 10px;
+	}
+
+	.task_tit_text_2 {
+		font-size: 14px;
+		color: rgba(0, 0, 0, 1);
+	}
+
+	.task_detail {
+		padding-top: 20px;
+		padding-bottom: 20px;
+	}
+
+	.task_detail_text_1 {
+		font-size: 14px;
+		color: rgba(170, 170, 170, 1);
+		line-height: 20px;
+		margin-bottom: 5px;
+	}
+
+	.task_detail_text_2 {
+		font-size: 14px;
+		color: rgba(0, 0, 0, 1);
+		line-height: 20px;
+	}
+
+	.task_bottom {
+		flex-direction: row;
+		justify-content: space-between;
+		align-items: center;
+	}
+
+	.task_bottom_flex {
+		flex-direction: row;
+		align-items: center;
+	}
+
+	.task_bottom_evaluate {
+		width: 80px;
+		height: 40px;
+		border-radius: 8px;
+		border-style: solid;
+		border-width: 1px;
+		border-color: rgba(170, 170, 170, 1);
+		font-size: 12px;
+		font-weight: 400;
+		color: rgba(170, 170, 170, 1);
+		line-height: 17px;
+		text-align: center;
+		line-height: 40px;
+		margin-right: 10px;
+	}
+
+	.task_bottom_sure {
+		width: 80px;
+		height: 40px;
+		border-radius: 8px;
+		border-style: solid;
+		border-width: 1px;
+		border-color: rgba(170, 170, 170, 1);
+		font-size: 12px;
+		font-weight: 400;
+		color: rgba(170, 170, 170, 1);
+		line-height: 17px;
+		text-align: center;
+		line-height: 40px;
+		margin-right: 10px;
+	}
+
+	.task_bottom_done {
+		width: 80px;
+		height: 40px;
+		border-radius: 8px;
+		background-color: rgba(73, 109, 245, 1);
+		border-style: solid;
+		border-width: 1px;
+		border-color: rgba(73, 109, 245, 1);
+		font-size: 12px;
+		font-weight: 400;
+		color: #fff;
+		line-height: 17px;
+		text-align: center;
+		line-height: 40px;
+		margin-right: 10px;
+	}
+
+	.task_bottom_cancelOrder {
+		width: 80px;
+		height: 40px;
+		border-radius: 8px;
+		background-color: rgba(73, 109, 245, 1);
+		border-style: solid;
+		border-width: 1px;
+		border-color: rgba(73, 109, 245, 1);
+		font-size: 12px;
+		font-weight: 400;
+		color: #fff;
+		line-height: 17px;
+		text-align: center;
+		line-height: 40px;
+		margin-right: 10px;
+	}
+
+	.addAction_Btn {
+		margin-top: 40rpx;
+		padding: 0 0 20px 0;
+		align-items: center;
+		background-color: rgba(246, 246, 246, 1);
+	}
+
+	.addAction_pubBtn {
+		width: 240px;
+		height: 50px;
+		background-color: rgba(73, 109, 245, 1);
+		border-radius: 8px;
+		color: #fff;
+		font-size: 16px;
+		font-weight: 600;
+		text-align: center;
+		line-height: 50px;
+	}
+
+	.addAction_agreement_img {
+		width: 12px;
+		height: 12px;
+	}
+
+	.addAction_agreement {
+		flex-direction: row;
+		margin-top: 10px;
+	}
+
+	.addAction_text {
+		font-size: 10px;
+		height: 14px;
+		font-size: 10px;
+		font-weight: 400;
+		color: rgba(0, 0, 0, 1);
+		line-height: 14px;
+		margin-left: 5px;
+	}
+
+	.addAction_textCl {
+		font-size: 10px;
+		height: 14px;
+		font-size: 10px;
+		font-weight: 400;
+		color: #496DF5;
+		line-height: 14px;
+	}
+
+	.takeOrder {
+		padding: 10px 15px 10px 12px;
+		flex-direction: row;
+		align-items: center;
+		background-color: #fff;
+		margin-top: 5px;
+		justify-content: space-between;
+	}
+
+	.takeOrder_ava {
+		width: 60px;
+		height: 60px;
+		border-radius: 50%;
+	}
+
+	.takeOrder_people {
+		margin-left: 14px;
+	}
+
+	.takeOrder_peopleTitle {
+		font-size: 14px;
+		font-weight: 600;
+		color: rgba(0, 0, 0, 1);
+		line-height: 20px;
+	}
+
+	.takeOrder_peopleName {
+		font-size: 14px;
+		font-weight: 400;
+		color: rgba(0, 0, 0, 1);
+		line-height: 20px;
+	}
+
+	.takeOrder_mobile {
+		margin-right: 20px;
+		font-size: 14px;
+		font-weight: 600;
+		color: rgba(0, 0, 0, 1);
+		line-height: 20px;
+	}
+
+	.takeOrder_img {
+		width: 40px;
+		height: 40px;
+		margin-left: 20px;
+	}
+
+	.task_feed_one {
+		padding: 10px 15px 20px 12px;
+		background-color: #fff;
+		margin-top: 5px;
+	}
+
+	.task_feed_one_title {
+		font-size: 14px;
+		font-weight: 600;
+		color: rgba(0, 0, 0, 1);
+		line-height: 20px;
+		margin-right: 9px;
+	}
+
+	.task_feed_one_msg {
+		font-size: 14px;
+		font-weight: 400;
+		color: rgba(0, 0, 0, 1);
+		line-height: 20px;
+		margin-top: 10px;
+	}
+
+	.task_feed_one_list {
+		flex-direction: row;
+		/* justify-content: center; */
+		padding-left: 5px;
+	}
+
+	.task_feed_one_img {
+		width: 60px;
+		height: 60px;
+		margin-top: 10px;
+	}
+
+	.task_feed_status {
+		flex-direction: row;
+		align-items: center;
+	}
+
+	.task_feed_star {
+		width: 12px;
+		height: 11px;
+		margin-right: 1px;
+	}
+
+	.taskDetail_only {
+		font-size: 10px;
+		font-weight: 400;
+		color: rgba(0, 0, 0, 1);
+		line-height: 14px;
+	}
+</style>

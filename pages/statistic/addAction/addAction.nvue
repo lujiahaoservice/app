@@ -1,0 +1,232 @@
+<template>
+  <div class="addActionType">
+    <div class="box1">
+      <div class="addActionType_box">
+        <div class="addActionType_box_inp">
+          <image class="addActionType_bigger" src="/static/find.png" alt="">
+            <input class="addActionType_input" v-model="addActionType_input" confirm-type="search" type="text" />
+            <image class="addActionType_not_it" src="/static/delete.png" alt="">
+        </div>
+        <text class="addActionType_box_search" @click="initData">搜索</text>
+      </div>
+      <scroll-view show-scrollbar=false scroll-y=true class="addActionType_all">
+        <div class="addActionType1" :style="{marginTop: index === 0 ? '0' : '40px'}"
+          v-for="(item, index) in categoryList" :key="index">
+          <div class="addActionType_title" @click="slideBack(item, index)">
+            <text class="addActionTypeTitle">{{item.parentName.name}}</text>
+            <image class="addActionType_down" src="/static/xiala.png" alt="" :style="{transform:item.parentName.active == '0' ? 'rotate(0deg)' : 'rotate(180deg)'}">
+            <!-- <div v-if="item.parentName.active == '0'"></div> -->
+          </div>
+          <div class="addActionType_eachType_box" v-if="item.parentName.active == '0'">
+            <text class="addActionType_eachType_each"
+              :style="{color: val.active == '0' ? '#AAAAAA' : '#496DF5', borderColor: val.active == '0' ? '#AAAAAA' : '#496DF5', marginRight: i % 4 == 3 ? '0' : '20rpx'}"
+              v-for="(val, i) in item.childrenName" :key="val.id" @click="activeIt(val, item.parentName.name)">{{val.name}}</text> 
+          </div>
+        </div>
+      </scroll-view>
+    </div>
+    <div class="flexIt">
+      <text class="sureItType" @click="sureBack">确定</text>
+    </div>
+  </div>
+</template>
+
+<script>
+  import http from '@/utils/request'
+  import { mapMutations } from 'vuex'
+  export default {
+    data() {
+      return {
+        addActionType_input: '',
+        categoryList: [],
+        chooseNow: ''
+      }
+    },
+    onLoad() {
+      this.initData()
+    },
+    onShow() {
+    },
+    methods: {
+      ...mapMutations(['updateChooseType']),
+      initData() {
+        let data = {
+          name: this.addActionType_input
+        }
+        if (data.name == '') {
+          delete data.name
+        }
+        http('get', 'task/categoryList', data, res => {
+          if (res.code == 200) {
+            this.categoryList = res.data
+          }
+        })
+      },
+      // 选中
+      activeIt(e, title) {
+        if(this.chooseNow!='') {
+          this.chooseNow.active = '0'
+        }
+        e.active == '0' ? e.active = '1' : e.active = '0'
+        if (e.active == '1') {
+          this.updateChooseType({
+            title,
+            name: e.name
+          })
+        }
+        this.chooseNow = e
+      },
+      sureBack() {
+        uni.navigateBack({
+          delta: 1
+        });
+      },
+      slideBack(e, i) {
+        if(e.parentName.active == '0') {
+          this.categoryList[i].parentName.active = '1'
+        } else {
+          this.categoryList[i].parentName.active = '0'
+        }
+      }
+    },
+    onNavigationBarButtonTap: function onNavigationBarButtonTap(e) {
+      this.updateChooseType({
+            title: '',
+            name: ''
+      })
+      uni.navigateBack({
+        delta: 1
+      });
+    }
+  }
+</script>
+
+<style>
+  .addActionType {
+    flex: 1;
+    background-color: #fff;
+    padding-bottom: 31px;
+    justify-content: space-between;
+  }
+
+  .box1 {
+    flex: 1;
+    padding-bottom: 31px;
+  }
+
+  .addActionType_box {
+    flex-direction: row;
+    padding-top: 10px;
+    padding-left: 15px;
+    padding-right: 15px;
+    align-items: center;
+    padding-bottom: 10px;
+  }
+
+  .addActionType_box_inp {
+    width: 295px;
+    height: 40px;
+    background-color: rgba(255, 255, 255, 1);
+    border-radius: 8px;
+    border-width: 1px;
+    border-style: solid;
+    border-color: rgba(151, 151, 151, 1);
+    flex-direction: row;
+    padding: 9px 5px;
+  }
+
+  .addActionType_bigger {
+    width: 22px;
+    height: 22px;
+  }
+
+  .addActionType_input {
+    height: 22px;
+    width: 235px;
+    padding-left: 15px;
+    padding-right: 15px;
+    font-size: 14px;
+  }
+
+  .addActionType_not_it {
+    width: 22px;
+    height: 22px;
+  }
+
+  .addActionType_box_search {
+    width: 33px;
+    height: 20px;
+    font-size: 14px;
+    font-weight: 400;
+    color: rgba(73, 109, 245, 1);
+    line-height: 20px;
+    margin-left: 17px;
+  }
+
+  .addActionType_all {
+    flex: 1;
+    padding-top: 20px;
+    padding: 13px;
+  }
+
+  .addActionType_title {
+    flex-direction: row;
+    align-items: center;
+    padding-right: 15px;
+    justify-content: space-between;
+  }
+
+  .addActionTypeTitle {
+    font-size: 14px;
+  }
+
+  .activeIt {
+    color: #496DF5;
+    border-width: 1px;
+    border-style: solid;
+    border-color: #496DF5;
+  }
+
+  .addActionType_down {
+    width: 12px;
+    height: 12px;
+  }
+
+  .addActionType_eachType_box {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .addActionType_eachType_each {
+    width: 155rpx;
+    height: 30px;
+    border-radius: 4px;
+    border-style: solid;
+    border-width: 1px;
+    border-color: rgba(170, 170, 170, 1);
+    font-size: 12px;
+    font-weight: 500;
+    color: rgba(170, 170, 170, 1);
+    line-height: 30px;
+    text-align: center;
+    margin-top: 10px;
+  }
+
+  .flexIt {
+    height: 50px;
+    flex-direction: row;
+    justify-content: center;
+  }
+
+  .sureItType {
+    width: 240px;
+    height: 50px;
+    background-color: rgba(73, 109, 245, 1);
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 1);
+    line-height: 50px;
+    text-align: center;
+  }
+</style>

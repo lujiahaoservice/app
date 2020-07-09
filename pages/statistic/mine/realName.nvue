@@ -1,0 +1,322 @@
+<template>
+	<div class="s_realName" v-if="verifiedStatus != '' || verifiedStatus == 0">
+		<div class="realName_item">
+			<input type="text" confirm-type="next" v-model="name" placeholder="姓名" class="input_name"
+				disabled="verifiedStatus == 2 ? true : false">
+		</div>
+		<div class="realName_item">
+			<input type="text" confirm-type="done" @confirm="focused" disabled="verifiedStatus == 2 ? true : false"
+				v-model="identityCard" placeholder="身份证号" class="input_name">
+		</div>
+		<div class="realName_idCard">
+			<text class="idcard_title">请拍摄并上传身份证</text>
+			<div class="idCaard_main">
+				<div class="id_main_left">
+					<image :src="idCardImg.photo" @click="chooseMyImg(0)" alt="身份证" class="idcard_img">
+						<text class="idcard_text">点击上传带头像的一面</text>
+				</div>
+				<div class="id_main_left">
+					<image :src="idCardImg.nophoto" @click="chooseMyImg(1)" alt="身份证" class="idcard_img">
+						<text class="idcard_text">点击上传带国徽的一面</text>
+				</div>
+			</div>
+		</div>
+		<div style="flex: 1;" @click='focused'></div>
+		<div class="real_name_btn_box" v-if="verifiedStatus != 2">
+			<div class="real_name_btn" @click="saveMsg">
+				<text class="real_name_btn_text">确认</text>
+			</div>
+		</div>
+		<div class="hadreadBox" v-if="verifiedStatus != 2">
+			<image class="addAction_agreement_img" src="/static/mineImg/mine_annius.png" alt="" v-if="hadread"
+				@click="hadread = !hadread">
+				<image class="addAction_agreement_img" src="/static/mineImg/mine_anniu.png" alt="" v-else
+					@click="hadread = !hadread">
+					<text class="hadreadFont" @click="hadread = !hadread">我已认真阅读并同意</text><text class="lan"
+						@click="protocol1">《隐私协议》</text><text class="lan" @click="protocol2">《实名认证》</text class="lan">
+		</div>
+	</div>
+</template>
+
+<script>
+	import http from '@/utils/request'
+	export default {
+		data() {
+			return {
+				hadread: false,
+				idCardImg: {
+					photo: '../../../static/mineImg/id_zheng.png',
+					nophoto: '../../../static/mineImg/id_fan.png'
+				},
+				name: '',
+				identityCard: '',
+				identityPhoto: [],
+				verifiedStatus: ''
+			}
+		},
+		onLoad() {
+			this.initData()
+		},
+		onShow() {
+
+		},
+		onHide() {
+
+		},
+		methods: {
+			focused() {
+				uni.hideKeyboard()
+			},
+			initData() {
+				let that = this
+				http('get', 'clientUser/idCard', {}, res => {
+					if (res.code == 200) {
+						that.verifiedStatus = res.data.verifiedStatus
+						if (res.data.verifiedStatus != 0) {
+							that.name = res.data.name
+							that.identityCard = res.data.identityCard
+							let IDimg = JSON.parse(res.data.identityPhoto)
+							IDimg.forEach(val => {
+								if (val.name == 'z') {
+									that.idCardImg.photo = val.path
+								} else {
+									that.idCardImg.nophoto = val.path
+								}
+								let card = {
+									name: val.name,
+									path: val.path
+								}
+								that.identityPhoto.push(card)
+							})
+						}
+					}
+				})
+			},
+			saveMsg() {
+				const subNVue = uni.getSubNVueById('sureToast')
+				console.log(this.name)
+				console.log(this.identityCard)
+				console.log(typeof (this.identityPhoto[0]) !== 'object')
+				console.log(typeof (this.identityPhoto[1]) !== 'object')
+				if (this.name == '' || this.identityCard == '' || typeof (this.identityPhoto[0]) !== 'object' || typeof (this.identityPhoto[1]) !== 'object') {
+					subNVue.show('slide-in-bottom', 300, function () {
+						// 打开后进行一些操作...
+						//   
+					});
+
+					uni.$emit('getAgree', {
+						msg: '请填写正确的信息',
+					})
+					return
+				}
+				if (this.hadread) {
+					const data = {
+						name: this.name,
+						identityCard: this.identityCard,
+						identityPhoto: JSON.stringify(this.identityPhoto)
+					}
+					http('put', 'clientUser/idCard', data, res => {
+						uni.showToast({
+							title: '实名认证审核提交成功',
+							duration: 2000
+						});
+						if (res.code == 200) {
+							setTimeout(function () {
+								uni.navigateBack({
+								delta: 1
+							});
+							}, 2000)
+							// subNVue.show('slide-in-bottom', 300, function () {
+							// 	// 打开后进行一些操作...  
+							// 	//   
+							// });
+							// subNVue.postMessage({
+							// 	content: '实名认证审核提交成功',
+							// 	goback: 1
+							// })
+						}
+					})
+				} else {
+					console.log('3---------')
+					subNVue.show('slide-in-bottom', 300, function () {
+						// 打开后进行一些操作...  
+						//   
+					});
+
+					uni.$emit('getAgree', {
+						msg: '请阅读《隐私协议》及《实名认证》并同意',
+					})
+					// subNVue.postMessage({
+					// 	content: '请阅读《隐私协议》及《实名认证》并同意'
+					// })
+				}
+			},
+			chooseMyImg(e) {
+				let that = this
+				if (this.verifiedStatus == 2) {
+					return
+				}
+				uni.chooseImage({
+					sizeType: ['compressed'],
+					count: 1,
+					success: (chooseImageRes) => {
+						const tempFilePaths = chooseImageRes.tempFilePaths
+						if (!e) {
+							that.idCardImg.photo = tempFilePaths[0]
+						} else {
+							that.idCardImg.nophoto = tempFilePaths[0]
+						}
+						that.upload(tempFilePaths[0], e)
+					},
+					fail: (e) => {
+					}
+				});
+			},
+			upload(filePath, state) {
+				uni.showLoading({
+					mask: true,
+					title: '上传中'
+				})
+				let that = this
+				const token = uni.getStorageSync('yq_token')
+				uni.uploadFile({
+					url: 'https://api.yqyes.com/common/upload', //仅为示例，非真实的接口地址
+					filePath,
+					name: 'file',
+					header: {
+						Authorization: token //自定义请求头信息
+					},
+					success: (res) => {
+						let card = {
+							name: state === 0 ? 'z' : 'f',
+							path: JSON.parse(res.data).data
+						}
+						that.identityPhoto[state] = card
+						uni.hideLoading()
+					},
+					fail: (res) => {
+					}
+				});
+			},
+			protocol1() {
+				uni.navigateTo({
+					url: '/pages/statistic/protocol/privacy'
+				})
+			},
+			protocol2() {
+				uni.navigateTo({
+					url: '/pages/statistic/protocol/realName'
+				})
+			}
+		},
+		onNavigationBarButtonTap: function onNavigationBarButtonTap(e) {
+			uni.navigateBack({
+				delta: 1
+			});
+		}
+	}
+</script>
+
+<style>
+	.s_realName {
+		font-size: 28rpx;
+		padding: 0 22rpx;
+		padding-bottom: 20px;
+		flex: 1;
+		background-color: #fff;
+	}
+
+	.input_name {
+		font-size: 28rpx;
+	}
+
+	.realName_item {
+		padding: 48rpx 20rpx 18rpx;
+		border-bottom-width: 1px;
+		border-bottom-style: solid;
+		border-bottom-color: #DCDCDC;
+	}
+
+	.real_name_btn_box {
+		justify-content: center;
+		align-items: center;
+	}
+
+	.real_name_btn {
+		width: 240px;
+		height: 50px;
+		background-color: rgba(73, 109, 245, 1);
+		border-radius: 8px;
+		justify-content: center;
+		align-items: center;
+	}
+
+	.real_name_btn_text {
+		font-size: 16px;
+		font-weight: 600;
+		color: rgba(255, 255, 255, 1);
+		/* line-height:22px; */
+	}
+
+	.idcard_title {
+		margin-top: 24px;
+		font-size: 14px;
+		font-family: PingFangSC-Regular, PingFang SC;
+		font-weight: 400;
+		color: rgba(0, 0, 0, 1);
+		line-height: 20px;
+	}
+
+	.idCaard_main {
+		flex-direction: row;
+		margin-top: 10px;
+		justify-content: space-between;
+	}
+
+	.id_main_left {
+		width: 164px;
+	}
+
+	.idcard_img {
+		width: 164px;
+		height: 108px;
+	}
+
+	.idcard_text {
+		width: 164px;
+		text-align: center;
+		margin-top: 10px;
+		height: 17px;
+		font-size: 12px;
+		font-weight: 400;
+		color: rgba(102, 102, 102, 1);
+		line-height: 17px;
+	}
+
+	.hadreadBox {
+		flex-direction: row;
+		justify-content: center;
+		align-items: center;
+		margin-top: 10px;
+	}
+
+	.addAction_agreement_img {
+		width: 12px;
+		height: 12px;
+	}
+
+	.hadreadFont {
+		font-size: 10px;
+		font-weight: 400;
+		color: rgba(0, 0, 0, 1);
+		line-height: 14px;
+		margin-left: 5px;
+	}
+
+	.lan {
+		font-size: 10px;
+		font-weight: 400;
+		color: #496DF5;
+		line-height: 14px;
+	}
+</style>

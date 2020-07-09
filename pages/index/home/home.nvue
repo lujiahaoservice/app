@@ -1,0 +1,510 @@
+<template>
+	<div class="home">
+		<div>
+			<div class="home_tab">
+				<div class="home_tab_f">
+					<text @click="hz" :class="{active:cur==0}" class="hz">{{here}}</text>
+					<text @click="w_City" :class="{active:cur==1}" class="w_City">全部</text>
+				</div>
+			</div>
+			<div class="finance_header">
+				<div class="left">
+					<image src="../../../static/find.png" class="find"></image>
+					<input class="inpt" confirm-type='search'  type="text" @confirm="searchFinance"  v-model="finance"
+						 placeholder="请输入你想知道的任务"   />
+					<image src="../../../static/delete.png"  class="eliminate"  @click="frem"></image>
+				</div>
+				<div class="right1">
+					<text class="search" @click="searchFinance">搜索</text>
+				</div>
+			</div>
+		</div>
+		<div style="flex: 1;padding: 0 10px;">
+			<scroll-view show-scrollbar=false scroll-y=true @scrolltolower="reachBottom" lower-threshold="50">
+				<div class="home_tab_c_box">
+					<div class="home_tab_c" @click="goDetail(item, index)" v-for="(item, index) in partList" :key="index">
+						<div class="tab_c_fbox">
+							<div class="tab_c_topBox">
+								<text class="tab_c_top1">{{item.province + item.city + item.district}}</text>
+								<text class="tab_c_top2">距离{{item.distance}}km</text>
+								<text class="tab_c_top3">任务赏金：{{(item.money / 100).toFixed(2)}}元</text>
+							</div>
+							<div class="tab_c_bottomBox">
+								<div class="tab_c_bottomL">
+									<text class="sort"
+										:style="{'background-color':colorChange(item.pcategoryName)}">{{item.categoryName}}</text>
+									<div class="time">
+										<image src="../../../static/home/clock.png" class="clock"></image>
+										<text class="time_bef">{{item.updated}}</text>
+									</div>
+								</div>
+								<div class="tab_c_bottomR">
+									<div class="flexItLock">
+										<text class="logo">{{item.title}}</text>
+										<text class="sortLock">{{item.taskLock == 1 ? '已锁定' : ' '}}</text>
+									</div>
+									<div class="describe_box">
+										<text style="lines: 2;text-overflow: ellipsis" class="describe">{{item.detail}}</text>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</scroll-view>
+		</div style="flex: 1;padding: 0 10px;">
+	</div>
+</template>
+
+<script>
+	import { mapState, mapMutations } from 'vuex'
+	import http from '@/utils/request'
+	// import settings from "@/js_sdk/dc-settings/settings.js"
+	import permision from "@/js_sdk/dc-settings/permission.js"
+	import { friendlyDate } from "@/utils/util"
+	export default {
+		components: {
+		},
+		computed: {
+			...mapState(['place', 'deleteOne'])
+		},
+		data() {
+			return {
+				init: 1,
+				cur: 0,
+				finance: '',
+				here: '',
+				finance_a: '',
+				pageNum: 1,
+				pageSize: 10,
+				pages: 0,
+				partList: [],
+				nowPlace: '',
+				clickIndex: -1
+			}
+		},
+		watch: {
+			place(val) {
+				this.nowPlace = val
+				this.pageNum = 1
+				this.initData(false)
+			},
+			cur(val) {
+				this.pageNum = 1
+				this.initData(false)
+			},
+			deleteOne(val) {
+				this.partList.splice(val, 1)
+			}
+		},
+		onLoad() {
+			let that = this
+			const res = uni.getSystemInfoSync();
+			this.pageNum = 1
+			const yq_place = uni.getStorageSync('yq_place')
+			setTimeout(() => {
+				if (yq_place) {
+					this.nowPlace = yq_place
+					this.initData(false)
+				} else {
+					that.here = '杭州'
+					this.initData(false)
+					const timer = setInterval(() => {
+						this.getPlace()
+						let re_place = uni.getStorageSync('yq_place')
+						if (re_place != '') {
+							clearInterval(timer)
+							that.nowPlace = re_place
+							that.initData(false)
+						}
+					}, 300000);
+				}
+			}, 0)
+		},
+		onShow() {
+			// permision.gotoAppSetting()
+			// settings.open(settings.LOCATION_SOURCE_SETTINGS)
+		},
+		methods: {
+			...mapMutations(["getPlace"]),
+			// 获取首页列表
+			initData(e) {
+				let that = this
+				if (that.nowPlace != '') {
+					that.here = that.nowPlace.address.city
+					let latitude = that.nowPlace.latitude
+					let longitude = that.nowPlace.longitude
+					let point = new plus.maps.Point(longitude, latitude)
+					plus.maps.Map.reverseGeocode(
+						point,
+						{},
+						function (event) {
+							uni.request({
+								url: 'https://restapi.amap.com/v3/geocode/geo?parameters',
+								method: 'GET',
+								data: {
+									address: event.address,
+									key: 'd1c69d525cab4e37c7b426aa3a97eda6'
+								},
+								success: (res) => {
+									let cityCode = res.data.geocodes[0].citycode
+                  uni.setStorageSync('yq_citycode', cityCode)
+									let data = {
+										pageNum: that.pageNum,
+										pageSize: that.pageSize,
+										cityCode: that.nowPlace.address.cityCode || cityCode,
+										name: that.finance
+									}
+									if (that.finance == '') {
+										delete data.name
+									}
+									if (that.cur == 1) {
+										delete data.cityCode
+									}
+									http('get', 'task/page', data, res => {
+										let msg = res.data.records
+										if (msg.length == 0) {
+											return
+										}
+										msg.forEach(val => {
+											val.updated = friendlyDate(
+												new Date(val.updated.replace(/\-/g, "/")).getTime()
+											)
+										})
+										if (res.code == 200) {
+											if (e) {
+												let newList = that.partList.concat(msg)
+												that.partList = newList
+											} else {
+												that.partList = msg
+											}
+										}
+										that.pages = res.data.pages
+									})
+								}
+							});
+						},
+						function (e) { }
+					)
+				} else {
+					let latitude = '30.28254665798611'
+					let longitude = '120.0289868164062'
+					let data = {
+						pageNum: that.pageNum,
+						pageSize: that.pageSize,
+						cityCode: '0571',
+						name: that.finance
+					}
+					if (that.finance == '') {
+						delete data.name
+					}
+					if (that.cur == 1) {
+						delete data.cityCode
+					}
+					http('get', 'task/page', data, res => {
+						if (res.code == 200) {
+							let msg = res.data.records
+							if (msg.length == 0) {
+								return
+							}
+							msg.forEach(val => {
+								val.updated = friendlyDate(
+									new Date(val.updated.replace(/\-/g, "/")).getTime()
+								)
+							})
+							if (e) {
+								let newList = that.partList.concat(msg)
+								that.partList = newList
+							} else {
+								that.partList = msg
+							}
+						}
+						that.pages = res.data.pages
+					})
+				}
+			},
+			// 价格搜索
+			searchFinance() {
+				this.initData(false)
+				this.focused()
+			},
+			focused() {
+				uni.hideKeyboard()
+			},
+			hz() {
+				this.cur = 0
+			},
+			w_City() {
+				this.cur = 1
+			},
+			colorChange(e) {
+				if (e === '线上任务') {
+					return 'rgba(245,216,73,1)'
+				} else if (e === '线下任务') {
+					return 'rgba(245,134,73,1)'
+				} else if (e === '跑腿任务') {
+					return 'rgba(73,225,245,1)'
+				}
+			},
+			frem() {
+				this.finance = ''
+			},
+			frem_a() {
+				this.finance_a = ''
+			},
+			goDetail(e, index) {
+				if (e.taskLock == 1) {
+					return
+				}
+				uni.navigateTo({
+					url: `/pages/index/task/taskDetail?id=${e.taskId}&status=1&clickIndex=${index}`
+				})
+			},
+			reachBottom() {
+				if (this.pageNum < this.pages) {
+					this.pageNum += 1
+					this.initData(true)
+				}
+			},
+			to_pb() {
+
+			}
+		},
+		onPullDownRefresh() {
+			this.pageNum = 1
+			this.initData(false)
+			uni.stopPullDownRefresh();
+		},
+		onBackPress(e) {
+		}
+	}
+</script>
+
+<style scoped>
+	.home {
+		background-color: rgba(249, 249, 249, 1);
+		flex: 1;
+	}
+
+	.home_tab {
+		margin-top: 1px;
+		background-color: rgba(255, 255, 255, 1);
+	}
+
+	.home_tab_f {
+		width: 318rpx;
+		flex-direction: row;
+		align-items: center;
+		justify-content: space-between;
+		margin-left: 108px;
+		height: 80rpx;
+	}
+
+	.hz {
+		border-bottom-width: 2px;
+		border-bottom-style: solid;
+		border-bottom-color: rgba(255, 255, 255, 1);
+	}
+
+	.w_City {
+		border-bottom-width: 2px;
+		border-bottom-style: solid;
+		border-bottom-color: rgba(255, 255, 255, 1);
+	}
+
+	.active {
+		border-bottom-width: 2px;
+		border-bottom-style: solid;
+		border-bottom-color: rgba(73, 109, 245, 1);
+	}
+
+	/* 搜索 */
+	.finance_header {
+		width: 750rpx;
+		height: 100rpx;
+		background-color: #fff;
+		flex-direction: row;
+		/* justify-content: flex-end; */
+	}
+
+	.left {
+		width: 596rpx;
+		height: 100rpx;
+		margin-left: 20rpx;
+		flex-direction: row;
+		align-items: flex-end;
+	}
+
+	.find {
+		width: 44rpx;
+		height: 44rpx;
+		margin-bottom: 22rpx;
+	}
+
+	.inpt {
+		width: 466rpx;
+		height: 40rpx;
+		font-size: 14px;
+		margin-left: 34rpx;
+		margin-bottom: 24rpx;
+		font-weight: 400;
+	}
+
+	.eliminate {
+		width: 46rpx;
+		height: 46rpx;
+		margin-bottom: 18rpx;
+	}
+
+	.right1 {
+		width: 134rpx;
+		height: 100rpx;
+		justify-content: center;
+		align-items: center;
+		margin-top: 3px;
+	}
+
+	.search {
+		font-size: 14px;
+		font-weight: 400;
+		color: rgba(73, 109, 245, 1);
+		font-weight: 400;
+	}
+
+	/* tab子 */
+	.home_tab_c_box {
+		background-color: rgba(249, 249, 249, 1);
+		padding-bottom:30px;
+	}
+
+	.home_tab_c {
+		margin-top: 5px;
+		margin-left: 10px;
+		margin-right: 10px;
+		background-color: rgba(255, 255, 255, 1);
+		border-radius: 8px;
+	}
+
+	.flexItLock {
+		flex-direction: row;
+		justify-content: space-between;
+		align-items: center;
+	}
+
+	.tab_c_topBox {
+		/* display:flex; */
+		flex-direction: row;
+		justify-content: space-between;
+		border-bottom-width: 1px;
+		border-bottom-style: solid;
+		border-bottom-color: #F3F3F3;
+		margin-left: 12rpx;
+		margin-right: 18rpx;
+	}
+
+	.tab_c_top1 {
+		height: 25px;
+		font-size: 10px;
+		font-weight: 400;
+		color: rgba(0, 0, 0, 1);
+		line-height: 25px;
+		margin-left: 4rpx;
+	}
+
+	.tab_c_top2 {
+		height: 25px;
+		font-size: 10px;
+		font-weight: 400;
+		color: rgba(0, 0, 0, 1);
+		line-height: 25px;
+	}
+
+	.tab_c_top3 {
+		height: 25px;
+		font-size: 10px;
+		font-weight: 400;
+		color: rgba(214, 10, 10, 1);
+		line-height: 25px;
+	}
+
+	/*  */
+	.tab_c_bottomBox {
+		padding: 9px 0px 10px 10px;
+		flex-direction: row;
+	}
+
+	.sort {
+		width: 132rpx;
+		height: 56rpx;
+		border-radius: 8px;
+		align-items: center;
+		justify-content: center;
+		font-size: 10px;
+		font-weight: 400;
+		color: rgba(0, 0, 0, 1);
+		text-align: center;
+		line-height: 56rpx;
+	}
+
+	.sortLock {
+		height: 56rpx;
+		border-radius: 8px;
+		align-items: center;
+		justify-content: center;
+		font-size: 10px;
+		font-weight: 400;
+		color: rgba(214, 10, 10, 1);
+		text-align: center;
+		line-height: 56rpx;
+	}
+
+	.time {
+		/* display:flex; */
+		flex-direction: row;
+		justify-content: space-between;
+		align-items: center;
+		/* width: 66px; */
+		margin-top: 6px;
+		padding-left: 6px;
+	}
+
+	.clock {
+		width: 24rpx;
+		height: 24rpx;
+	}
+
+	.time_bef {
+		font-size: 10px;
+		font-weight: 400;
+		color: rgba(0, 0, 0, 1);
+		line-height: 14px;
+		margin-right: 4px;
+	}
+
+	/*  */
+	.tab_c_bottomR {
+		margin-left: 16px;
+	}
+
+	.logo {
+		height: 20px;
+		font-size: 14px;
+		font-weight: 400;
+		color: rgba(0, 0, 0, 1);
+		line-height: 20px;
+	}
+
+	.describe_box {
+		padding-top: 3px;
+		width: 500rpx;
+		height: 64rpx;
+		overflow: hidden;
+	}
+
+	.describe {
+		font-size: 10px;
+		font-weight: 400;
+		color: rgba(0, 0, 0, 1);
+		line-height: 14px;
+	}
+</style>

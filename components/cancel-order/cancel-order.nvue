@@ -1,0 +1,200 @@
+<template>
+  <div class="cancelOrder_box">
+    <div class="cancelOrder" @click="focused">
+      <div class="cancelOrder_content">
+        <text class="cancelOrder_title"
+          v-if="status == 0">{{from == 1 ? '取消订单将收不到任务赏金，说明完成不了。' : '接单者已接单，现在去取消任务赏金扣除30%给接单者。'}}</text>
+        <text class="cancelOrder_title" style="text-align:center" v-if="status == 1">是否确认取消订单</text>
+        <textarea class="textA" @blur="focused" v-model="textA" placeholder="我同意。" v-if="status == 0"></textarea>
+        <div class="cancelOrder_tip" v-if="status == 0">
+          <image class="cancelOrder_img" src="/static/zy.png" alt="">
+            <text class="cancelOrder_tipFont">{{from == 1 ? '如果沟通过可备注，给10%赏金！' : '如果沟通过可备注，不扣除赏金！'}}</text>
+        </div>
+      </div>
+      <div class="showToast_line"></div>
+      <div class="showToast_double">
+        <text class="showToast_cancel" @click="cancel">取消</text>
+        <div class="center_line"></div>
+        <text class="showToast_sure" @click="sure">确认</text>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+  import http from '@/utils/request'
+  export default {
+    data() {
+      return {
+        textA: '',
+        from: 0,
+        taskId: 0,
+        status: 0
+      }
+    },
+
+    onShow() {
+      let that = this
+      const subNVue = uni.getCurrentSubNVue();
+      uni.$on('cancel_receive_task', function (data) {
+        that.from = data.from
+        that.taskId = data.taskId
+        that.status = data.status
+      })
+      subNVue.onMessage(res => {
+        that.from = res.data.from
+        that.taskId = res.data.taskId
+        that.status = res.data.status
+      })
+    },
+    methods: {
+      focused() {
+        uni.hideKeyboard()
+      },
+      sure() {
+        let that = this
+        uni.showLoading();
+        const subNVueIt = uni.getCurrentSubNVue();
+        const data = {
+          taskId: that.taskId,
+          cancelDesc: that.textA
+        }
+        if (that.status == 0) {
+          http('put', 'taskOrder/cancel', data, res => {
+            if (res.code == 200) {
+              subNVueIt.hide('slide-out-bottom', 300)
+              setTimeout(function () {
+                uni.navigateBack({
+                  delta: 2
+                });
+              uni.showToast({
+                title: '取消成功',
+                duration: 2000
+              });
+              }, 500);
+              // subNVueIt.postMessage({
+              //   success: 2
+              // })
+              uni.hideLoading();
+            }
+          })
+        } else {
+          http('put', `task/remove?id=${that.taskId}`, {}, res => {
+            if (res.code == 200) {
+              setTimeout(function () {
+                uni.navigateBack({
+                  delta: 1
+                });
+			  uni.showToast({
+				title: '取消成功',
+				duration: 2000
+			  });
+              }, 500);
+              // subNVueIt.hide('slide-out-bottom', 300)
+              // subNVueIt.postMessage({
+              //   success: 1
+              // })
+              uni.hideLoading();
+            }
+          })
+        }
+      },
+      cancel() {
+        const subNVueIt = uni.getCurrentSubNVue();
+        subNVueIt.hide('slide-out-bottom', 300)
+      }
+    }
+  }
+</script>
+
+<style scoped>
+  .cancelOrder_box {
+    flex: 1;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .cancelOrder {
+    width: 311px;
+    background-color: #fff;
+    border-radius: 8px;
+  }
+
+  .cancelOrder_content {
+    padding: 24px 16px;
+  }
+
+  .cancelOrder_title {
+    width: 279px;
+    height: 48px;
+    font-size: 16px;
+    font-weight: 400;
+    color: rgba(51, 51, 51, 1);
+    line-height: 24px;
+  }
+
+  .textA {
+    width: 279px;
+    height: 100px;
+    background-color: rgba(246, 246, 246, 1);
+    border-radius: 4px;
+    padding: 12px;
+    margin-top: 12px;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 22px;
+  }
+
+  .cancelOrder_tip {
+    flex-direction: row;
+    align-items: center;
+    margin-top: 8px;
+  }
+
+  .cancelOrder_img {
+    width: 12px;
+    height: 12px;
+  }
+
+  .cancelOrder_tipFont {
+    font-size: 12px;
+    font-weight: 400;
+    color: rgba(153, 153, 153, 1);
+    line-height: 16px;
+    margin-left: 4px;
+  }
+
+  .showToast_line {
+    height: 1px;
+    background-color: rgba(220, 220, 220, 1);
+  }
+
+  .showToast_double {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .showToast_cancel {
+    width: 154px;
+    text-align: center;
+    font-size: 18px;
+    font-weight: 400;
+    color: rgba(153, 153, 153, 1);
+    line-height: 24px;
+  }
+
+  .center_line {
+    width: 1px;
+    height: 47px;
+    background-color: rgba(221, 221, 221, 1);
+  }
+
+  .showToast_sure {
+    width: 156px;
+    text-align: center;
+    font-size: 18px;
+    font-weight: 400;
+    color: #496DF5;
+    line-height: 24px;
+  }
+</style>

@@ -1,0 +1,257 @@
+<template>
+	<div class="finance">
+		<!-- <SearchInput></SearchInput> -->
+		<div class="finance_header">
+			<div class="left">
+				<image src="../../../static/find.png" class="find"></image>
+				<input class="inpt" type="text" confirm-type="search" @confirm="initData(false)" v-model="finance"
+					placeholder="输入您想知道的参考价格信息" />
+				<image src="../../../static/delete.png" class="eliminate" @click="frem"></image>
+			</div>
+			<div class="right" @click="initData(false)">
+				<text class="search">
+					搜索
+				</text>
+			</div>
+		</div>
+		<text class="message">价格仅供参考，以实际为标准。可以发布任务试试</text>
+		<scroll-view scroll-y=true show-scrollbar=false style="flex: 1;" @scrolltolower="reachBottom" lower-threshold="50">
+			<div style="margin-bottom: 20px;">
+				<div class="finance_main" v-for="(item, index) in financeList" :key="index">
+					<div class="finance_card" @click="finance_details(item.proposedPriceId)">
+						<text class="tit">{{item.name}}</text>
+						<div class="contents">
+							<text class="tot" style="lines: 3;text-overflow: ellipsis">{{item.detail}}</text>
+						</div>
+						<div class="footer">
+							<text class="finance_footer">更新于{{item.created}} 数据来源：{{item.source}}</text>
+						</div>
+					</div>
+				</div>
+			</div>
+		</scroll-view>
+	</div>
+</template>
+
+<script>
+	import http from '@/utils/request'
+	export default {
+		data() {
+			return {
+				finance: '',
+				pageNum: 1,
+				pageSize: 10,
+				pages: 0,
+				financeList: []
+			}
+		},
+		onLoad() {
+
+		},
+		onPullDownRefresh() {
+			setTimeout(function () {
+				uni.stopPullDownRefresh()
+			}, 1000)
+		},
+		onShow() {
+			this.pageNum = 1
+			this.initData(false)
+		},
+		onHide() {
+
+		},
+		// 上拉加载
+		onReachBottom() {
+
+		},
+		methods: {
+			// 获取参考价格
+			initData(e) {
+				let that = this
+				let data = {
+					pageNum: this.pageNum,
+					pageSize: this.pageSize,
+					name: this.finance
+				}
+				if (data.name == '') {
+					delete data.name
+				}
+				http('get', 'proposedPrice/page', data, res => {
+					let msg = res.data.records
+					if (res.code == 200) {
+						if (e) {
+							let newList = that.financeList.concat(msg)
+							that.financeList = newList
+						} else {
+							that.financeList = msg
+						}
+					}
+					that.pages = res.data.pages
+				})
+			},
+			finance_details(e) {
+				uni.navigateTo({
+					url: `/pages/statistic/finance/pricedetails?id=${e}`
+				})
+			},
+			frem() {
+				this.finance = ''
+			},
+			reachBottom() {
+				if (this.pageNum < this.pages) {
+					this.pageNum += 1
+					this.initData(true)
+				}
+			}
+		},
+		onPullDownRefresh() {
+			this.pageNum = 1
+			this.initData(false)
+			uni.stopPullDownRefresh();
+		},
+		onReachBottom() {
+			// if (this.pageNum < this.pages) {
+			// 	this.pageNum += 1
+			// 	this.initData(true)
+			// }
+		},
+		toTaskSend() {
+		}
+	}
+</script>
+
+<style>
+	.finance {
+		width: 750rpx;
+		flex: 1;
+		background-color: #F6F6F6;
+	}
+
+	.finance_header {
+		width: 750rpx;
+		height: 100rpx;
+		background-color: #fff;
+		border-width: 1px;
+		border-style: solid;
+		border-color: #f6f6f6;
+		flex-direction: row;
+	}
+
+	.left {
+		width: 594rpx;
+		height: 92rpx;
+		margin-left: 20rpx;
+		border-bottom-width: 1px;
+		border-style: solid;
+		border-color: #496DF5;
+		flex-direction: row;
+		align-items: flex-end;
+	}
+
+	.find {
+		width: 44rpx;
+		height: 44rpx;
+		margin-bottom: 14rpx;
+	}
+
+	.inpt {
+		width: 452rpx;
+		height: 40rpx;
+		font-size: 14px;
+		margin-left: 34rpx;
+		margin-bottom: 14rpx;
+	}
+
+	.eliminate {
+		width: 46rpx;
+		height: 46rpx;
+		margin-left: 18rpx;
+		margin-bottom: 14rpx;
+	}
+
+	.right {
+		width: 136rpx;
+		height: 100rpx;
+		justify-content: center;
+	}
+
+	.search {
+		margin-left: -30rpx;
+		font-size: 14px;
+		font-weight: 400;
+		color: rgba(73, 109, 245, 1);
+	}
+
+	.message {
+		width: 750rpx;
+		height: 37px;
+		font-size: 12px;
+		font-weight: 400;
+		color: rgba(161, 161, 161, 1);
+		line-height: 37px;
+		text-align: center;
+	}
+
+	.finance_main {
+		width: 750rpx;
+		position: relative;
+		top: -40rpx;
+	}
+
+	.finance_card {
+		width: 710rpx;
+		padding-bottom: 9px;
+		position: relative;
+		background-color: #FFF;
+		border-radius: 8px;
+		box-shadow: 0px 2px 4px 0px rgba(220, 225, 244, 0.6);
+		margin-top: 44rpx;
+		margin-left: 20rpx;    
+	}
+
+	.tit {
+		font-size: 16px;
+		font-weight: 400;
+		color: rgba(0, 0, 0, 1);
+		margin-top: 24rpx;
+		padding-left: 24rpx;     
+		padding-right: 24rpx; 
+	}
+
+	.contents {
+		width: 750rpx;
+		margin-top: 18rpx;
+		flex-direction: column-reverse;
+	}
+
+	.tot {
+		font-size: 14px;
+		font-weight: 400;
+		color: rgba(0, 0, 0, 1);
+		line-height: 20px;
+		padding-left: 24rpx;     
+		width: 702rpx;
+	}
+
+	.footer {
+		width: 664rpx;
+	}
+
+	.finance_footer {
+		margin-top: 18rpx;
+		text-align: right;
+		font-size: 10px;
+		font-weight: 400;
+		color: rgba(143, 73, 245, 1);
+	}
+
+	.loading {
+		width: 750rpx;
+		height: 40rpx;
+		font-size: 14px;
+		text-align: center;
+		line-height: 14px;
+		position: absolute;
+		bottom: 40rpx;
+	}
+</style>

@@ -1,0 +1,135 @@
+<template>
+	<div class="withdrawal" @click="focused">
+		<div>
+			<div class="withdrawal_top">
+				<text class="withdrawal_top_text">卡号</text>
+				<input type="text" confirm-type="next" v-model="bankCard" class="withdrawal_top_input"
+					placeholder="请输入银行卡号">
+			</div>
+			<div class="withdrawal_top" style="margin-top: 1px;">
+				<text class="withdrawal_top_text">持卡人</text>
+				<input type="text" v-model="bankUsername" class="withdrawal_top_input" placeholder="请输入持卡人姓名">
+			</div>
+		</div>
+		<div class="real_name_btn_box">
+			<div class="real_name_btn" @click="show">
+				<text class="real_name_btn_text">确定</text>
+			</div>
+		</div>
+	</div>
+</template>
+<script>
+	import http from '@/utils/request'
+	export default {
+		components: {
+		},
+		data() {
+			return {
+				bankUsername: '',
+				bankCard: '',
+				width: 0,
+				way: 1,
+				way_flag: false
+			}
+		},
+		onLoad() {
+			const width = uni.getSystemInfoSync().windowWidth
+			this.width = width
+		},
+		onShow() {
+		},
+		onHide() {
+
+		},
+		methods: {
+			focused() {
+				uni.hideKeyboard()
+			},
+			show() {
+				let data = {
+					bankUsername: this.bankUsername,
+					bankCard: this.bankCard
+				}
+				const subNVue = uni.getSubNVueById('sureToastB')
+				http('put', 'clientUser/update', data, res => {
+					if (res.code == 200) {
+						// 打开 nvue 子窗体  
+						// subNVue.show('slide-in-bottom', 300, function () {
+						// 	// 打开后进行一些操作...  
+						// 	//   
+						// });
+						// subNVue.postMessage({
+						// 	content: '绑定成功',
+						// 	goback: 1
+						// });
+						uni.showToast({
+							title: '绑定成功',
+							duration: 1000
+						});
+						setTimeout(() => {
+							uni.navigateBack({
+								 delta: 1
+							}, 1000);
+						})
+					}
+				})
+			}
+		},
+		onNavigationBarButtonTap: function onNavigationBarButtonTap(e) {
+			uni.navigateBack({
+				delta: 1
+			});
+		}
+	}                                                                                                    
+</script>
+<style scoped>
+	.withdrawal {
+		flex: 1;
+		background-color: #f6f6f6;
+		padding-top: 1px;
+		padding-bottom: 32px;
+		justify-content: space-between;
+	}
+
+	.withdrawal_top {
+		flex-direction: row;
+		padding: 0 20px;
+		height: 53px;
+		align-items: center;
+		background-color: #fff;
+	}
+
+	.withdrawal_top_text {
+		font-size: 14px;
+		font-weight: 400;
+		color: rgba(0, 0, 0, 1);
+		width: 70px;
+	}
+
+	.withdrawal_top_input {
+		font-size: 14px;
+		width: 200px;
+		margin-left: 10px;
+	}
+
+	.real_name_btn_box {
+		justify-content: center;
+		align-items: center;
+	}
+
+	.real_name_btn {
+		width: 240px;
+		height: 50px;
+		background-color: rgba(73, 109, 245, 1);
+		border-radius: 8px;
+		justify-content: center;
+		align-items: center;
+	}
+
+	.real_name_btn_text {
+		font-size: 16px;
+		font-weight: 600;
+		color: rgba(255, 255, 255, 1);
+		/* line-height:22px; */
+	}
+</style>

@@ -1,0 +1,114 @@
+<template>
+	<div class="aboutours" style="justify-content: space-between;padding-bottom: 16px;">
+		<div>
+			<div class="title">
+				<text class="aboutours_top">用勤接单</text>
+			</div>
+			<div class="two">
+				<text class="aboutours_sky">让您多一份收入</text>
+			</div>
+			<div class="three"> 
+				<!-- <text class="aboutours_txt">什么是信用分12分</text><br />
+				<text style="padding-left: 20rpx;" class="aboutours_txt">信用分时为了良好的平台，接单人和用户之间</text>
+				<text class="aboutours_txt">的信用。</text><br />
+				<text class="aboutours_txt" style="margin-top: 30rpx;">什么是跑腿业务，线下业务，线上业务</text><br />									
+				<text style="padding-left: 20rpx;" class="aboutours_txt">跑腿业务，一般送东西，送快递，取东西，从</text> -->
+				<text class="aboutours_txt">				用勤接单的宗旨是让天下人有事做，多一份收入，而理念是省心，省力，省时间，为您办事，轻松解决您的需求问题，一键发单，及时响应，精准服务，品质完成，维护发布者和接单者的双方保障，重点是用勤劳的双手，赚更多钱，为家人付出更多的核心价值观。
+				</text>
+			</div>
+			<div class="footer">
+				<div class="relation"><text class="p">官网网站</text><text class="p">www.yqyes.com</text></div>
+				<div class="relation"><text class="p">客服电话</text><text class="p">13340043530</text></div>
+				<div class="relation"><text class="p">城市代理</text><text class="p">13340043530</text></div>
+				<div class="relation"><text class="p">商业合作</text><text class="p">13340043530@163.com</text></div>
+			</div>
+		</div>
+		<div style="align-items: center;">
+			<text style="font-size: 10px;color: #999999;">Copyright2018-2020</text>
+			<text style="font-size: 10px;color: #999999;">杭州新珏科技  版权所有</text>
+		</div>
+	</div>
+</template>
+
+<script>
+	export default {
+		onNavigationBarButtonTap: function onNavigationBarButtonTap(e) {
+		    uni.navigateBack({
+		      delta: 1
+		    }) 
+		  },
+		onLoad() {
+			() => {
+				setTimeout(function () {
+		    }, 1000)
+		    uni.startPullDownRefresh()
+			}
+		},
+		onPullDownRefresh() {
+		    setTimeout(function () {
+		        uni.stopPullDownRefresh()
+		    }, 1000)
+		},
+		}
+</script>
+
+<style lang="scss">
+	.aboutours{
+		width: 750rpx;
+		flex: 1;
+		background-color: #fff;
+	}
+	.title{
+		width: 750rpx;
+		border-top-width: 1px;
+		border-style: solid;
+		padding-top: 68rpx;
+		border-color: #f6f6f6;
+	}
+	.aboutours_top{
+		width: 750rpx;
+		height: 50rpx;
+		font-size:36rpx;
+		font-weight:400;
+		color:rgba(0,0,0,1);
+		text-align: center;
+	}
+	.two{
+		width: 750rpx;
+		height:	34rpx;
+		margin-top: 32rpx;
+	}
+	.aboutours_sky{
+		font-size:24rpx;
+		font-weight:400;
+		color:rgba(0,0,0,1);
+		text-align: center;
+	}
+	.three{
+		width: 614rpx;
+		height: 193px;
+		margin-left:66rpx;
+	}
+	.aboutours_txt{
+		font-size:28rpx;
+		font-weight:400;
+		color:rgba(0,0,0,1);
+		line-height:20px;
+	}
+	.footer{
+		width: 614rpx;
+		margin-top: 168rpx;
+		margin-left: 66rpx;
+	}
+	.relation{
+		width: 614rpx;
+		margin-top: 20rpx;
+		flex-direction: row;
+		justify-content: space-between;
+	}
+	.p{
+		font-size:14px;
+		font-weight:400;
+		color:rgba(0,0,0,1);
+	}
+</style>

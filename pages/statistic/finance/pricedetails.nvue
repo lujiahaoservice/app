@@ -1,0 +1,97 @@
+<template>
+	<div class="pricedetails">
+		<div class="finance_card">
+			<scroll-view scroll-y=true show-scrollbar=false style="flex: 1;">
+				<text class="tit">{{msg.name}}</text>
+				<div class="contents">
+					<text class="tot">{{msg.detail}}</text>
+				</div>
+				<div class="footer">
+					<text class="pricedetails_footer">更新于{{msg.created}} 数据来源：{{msg.source}}</text>
+				</div>
+			</scroll-view>
+		</div>
+	</div>
+</template>
+
+<script>
+	import http from '@/utils/request'
+	export default {
+		data() {
+			return {
+				msg: ''
+			}
+		},
+		onLoad(options) {
+			this.initData(options.id)
+		},
+		methods: {
+			initData(e) {
+				let that = this
+				http('get', 'proposedPrice/detail', {id: Number(e)}, res => {
+					if(res.code == 200) {
+						that.msg = res.data
+					}
+				})
+			}
+		},
+		onPullDownRefresh() {
+			uni.stopPullDownRefresh()
+		},
+		onNavigationBarButtonTap: function onNavigationBarButtonTap(e) {
+			uni.navigateBack({
+				delta: 1
+			})
+		}
+	}
+</script>
+
+<style>
+	.pricedetails {
+		flex: 1;
+		background-color: #fff;
+		width: 750rpx;
+		flex-direction: row;
+		justify-content: center;
+	}
+
+	.finance_card {
+		width: 690rpx;
+		margin-top: 44rpx;
+	}
+
+	.tit {
+		font-size: 16px;
+		font-weight: 400;
+		color: rgba(0, 0, 0, 1);
+		margin-top: 24rpx;
+	}
+
+	.contents {
+		width: 690rpx;
+		flex-direction: row;
+		justify-content: center;
+		margin-top: 18rpx;
+	}
+
+	.footer {
+		width: 690rpx;
+		margin-bottom: 20px;
+	}
+
+	.pricedetails_footer {
+		margin-top: 18rpx;
+		text-align: right;
+		font-size: 10px;
+		font-weight: 400;
+		color: rgba(143, 73, 245, 1);
+	}
+
+	.tot {
+		width: 690rpx;
+		font-size: 14px;
+		font-weight: 400;
+		color: rgba(0, 0, 0, 1);
+		line-height: 20px;
+	}
+</style>

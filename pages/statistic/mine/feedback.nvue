@@ -1,0 +1,189 @@
+<template>
+	<div class="feedback">
+		<div class="feedback_main">
+			<div class="feedback_header">
+				<div class="feedback_list" v-for="(item, index) in items" :key="item.value" @click="feedChange(item.id)">
+					<image class="feedback_img" :src="item.id == feedbackType?item.img2:item.img1" mode=""></image>
+					<text class="feedback_font">{{item.value}}</text>
+				</div>
+			</div>
+			<div class="feedback_area">
+				<textarea class="feedback_textarea" v-model="content"
+					placeholder-style="font-size:14px;line-height:20px;color:#AAAAAA"
+					placeholder="请补充详细问题和意见，不能小于10个字。"></textarea>
+			</div>
+		</div>
+		<div style="flex: 1" @click="focused"></div>
+		<!-- 底部提交按钮开始 -->
+		<div class="feedback_name_btn_box">
+			<div class="feedback_name_btn" @click="feedBackBtn">
+				<text class="feedback_name_btn_text">提交</text>
+			</div>
+		</div>
+		<!-- 底部提交按钮结束 -->
+	</div>
+</template>
+<script>
+	import http from '@/utils/request'
+	export default {
+		data() {
+			return {
+				items: [{
+					id: 1,
+					value: '功能异常：功能故障或不可用',
+					img1: '../../../static/mineImg/mine_anniu.png',
+					img2: '../../../static/mineImg/mine_annius.png'
+				}, {
+					id: 2,
+					value: '产品建议：用的不爽，我有建议',
+					img1: '../../../static/mineImg/mine_anniu.png',
+					img2: '../../../static/mineImg/mine_annius.png'
+				}, {
+					id: 3,
+					value: '其他问题',
+					img1: '../../../static/mineImg/mine_anniu.png',
+					img2: '../../../static/mineImg/mine_annius.png'
+				}
+				],
+				content: '',
+				feedbackType: 1
+			}
+		},
+		onLoad() {
+			
+		},
+		onShow() {
+
+		},
+		onHide() {
+
+		},
+		methods: {
+			focused() {
+				uni.hideKeyboard()
+			},
+			feedChange(index) {//选项卡
+				this.feedbackType = index
+			},
+			feedBackBtn() {
+				let that = this
+				const subNVue = uni.getSubNVueById('sureToast')
+				if (that.content == '') {
+					const subNVue = uni.getSubNVueById('sureToast')
+					subNVue.show('slide-in-bottom', 300, function () {
+						// 打开后进行一些操作...  
+						//   
+					});
+					
+					uni.$emit('getAgree',{
+						msg: '请填写意见详情'
+					})
+					// subNVue.postMessage({
+					// 	content: '请填写意见详情'
+					// });
+					return
+				}
+				const data = {
+					content: that.content,
+					feedbackType: that.feedbackType
+				}
+				http('post', 'feedback/save', data, res => {
+					if (res.code == 200) {
+						subNVue.show('slide-in-bottom', 300, function () {
+							// 打开后进行一些操作...  
+							//   
+						});
+						
+						uni.$emit('getAgree',{
+							msg: '意见反馈成功',
+							goback:1,
+						})
+						// subNVue.postMessage({
+						// 	content: '意见反馈成功',
+						// 	goback: 1
+						// })
+					}
+				})
+			}
+		},
+		onNavigationBarButtonTap: function onNavigationBarButtonTap(e) {
+			uni.navigateBack({
+				delta: 1
+			});
+		}
+	}
+</script>
+<style>
+	.feedback {
+		background-color: #F6F6F6;
+		flex: 1;
+		position: relative;
+		padding-bottom: 31px;
+	}
+
+	.feedback_main {
+		margin: 10px;
+	}
+
+	.feedback_header {
+		height: 120px;
+		background-color: rgba(255, 255, 255, 1);
+		border-radius: 8px;
+		padding: 18px 10px;
+	}
+
+	.feedback_list {
+		flex-direction: row;
+		align-items: center;
+		margin-bottom: 12px;
+	}
+
+	.feedback_font {
+		font-size: 14px;
+		font-weight: 400;
+		color: rgba(0, 0, 0, 1);
+		line-height: 20px;
+	}
+
+	.feedback_img {
+		width: 22px;
+		height: 22px;
+		margin-right: 10px;
+	}
+
+	.feedback_area {
+		height: 116px;
+		background-color: rgba(255, 255, 255, 1);
+		border-radius: 8px;
+		margin-top: 1px;
+	}
+
+	.feedback_textarea {
+		height: 116px;
+		padding: 14px 18px;
+	}
+
+	/* 底部按钮开始 */
+	.feedback_name_btn_box {
+		justify-content: center;
+		align-items: center;
+	}
+
+	.feedback_name_btn {
+		width: 240px;
+		height: 50px;
+		background-color: rgba(73, 109, 245, 1);
+		border-radius: 8px;
+		justify-content: center;
+		align-items: center;
+	}
+
+	.feedback_name_btn_text {
+		font-size: 16px;
+		font-weight: 600;
+		color: rgba(255, 255, 255, 1);
+		/* line-height:22px; */
+	}
+
+	/* 底部按钮结束 */
+</style>

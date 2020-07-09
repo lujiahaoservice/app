@@ -1,0 +1,502 @@
+<template>
+	<div class="vip_auth_wrap">
+		<div class="vipAuth" v-if="vipAuthTabs.length != 0">
+			<div :style="{ height: iStatusBarHeight + 'px', backgroundColor: '#30323F'}"></div>
+			<!-- 头部部分开始 -->
+			<div class="vipAuth_headers">
+				<div class="vipAuth_header">
+					<image :style="{width: width + 'px', height: '164px'}" src="../../../static/mineImg/mine_vipbg.png" mode="">
+						<div class="vipAuth_header_title">
+							<image class="vipAuth_header_img" src="../../../static/mineImg/mine_vipleft.png" mode="" @click="leave">
+								<text class="vipAuth_header_text">会员认证</text>
+						</div>
+				</div>
+				<!-- 滑块部分开始 -->
+				<div class="vipAuth_tag">
+					<scroll-view class="vipAuth_play_view" :style="{width: width + 'px'}" scroll-x=true show-scrollbar=false>
+						<div style="flex-direction: row;">
+							<div v-for="(vipAuthTab,index) in vipAuthTabs" :key="index" class="vipAuth_tag_box_wrap">
+								<div :class="index === choiceItem?'vipAuth_tag_box vipAuth_tag_box_chioce':'vipAuth_tag_box'"
+									@click="choiceVipPower(vipAuthTab, index)">
+									<div class="vipAuth_one_view">
+										<div class="vipAuth_txt">{{vipAuthTab.feeName}}</div>
+										<div class="vipAuth_money">
+											<text class="vipAuth_money_biao">¥</text>
+											<text class="vipAuth_money_biaos">{{(vipAuthTab.memberFee / 100).toFixed(2)}}</text>
+										</div>
+									</div>
+								</div>
+								<div class="vip_tip" v-if="vipAuthTab.desc">
+									<text class="vip_tip_text">{{vipAuthTab.desc}}</text>
+								</div>
+							</div>
+						</div>
+					</scroll-view>
+				</div>
+				<!-- 滑块部分结束 -->
+			</div>
+			<!-- 头部部分结束 -->
+			<!-- 会员权力开始 -->
+			<div class="vip_power">
+				<text class="vip_power_title">会员权益</text>
+				<scroll-view scroll-y="true" show-scrollbar="false" style="flex: 1">
+					<div class="power_list">
+						<div class="power_single">
+							<image src="../../../static/mineImg/yongjin.png" class="power_single_img">
+								<div class="power_single_text_box">
+									<text class="power_single_text">平台每单抽成</text>
+									<text class="power_single_text">{{power_item.memberFeePercentage}}</text>
+									<text class="power_single_text">%佣金</text>
+								</div>
+						</div>
+						<div class="power_single">
+							<image src="../../../static/mineImg/shangxian.png" class="power_single_img">
+								<text class="power_single_text">任务金额上限</text>
+								<text class="power_single_text">{{(power_item.taskAmount / 100).toFixed(2)}}</text>
+								<text class="power_single_text">元</text>
+						</div>
+						<div class="power_single">
+							<image src="../../../static/mineImg/everyday.png" class="power_single_img">
+								<text class="power_single_text">每天接单数量:</text>
+								<text class="power_single_text">{{power_item.receiptNumber}}</text>
+								<text class="power_single_text">单</text>
+						</div>
+						<div class="power_single">
+							<image src="../../../static/mineImg/time.png" class="power_single_img">
+								<text class="power_single_text">延时查看最新任务:</text>
+								<text class="power_single_text">{{power_item.priorityTime}}</text>
+								<text class="power_single_text">分钟</text>
+						</div>
+						<div class="power_single">
+							<image src="../../../static/mineImg/max.png" class="power_single_img">
+								<text class="power_single_text">最高接单数量:</text>
+								<text class="power_single_text">{{power_item.maximumNumber}}</text>
+								<text class="power_single_text">单</text>
+						</div>
+					</div>
+				</scroll-view>
+			</div>
+			<!-- 会员权力结束 -->
+			<!-- 会员开通开始 -->
+			<div class="vip_bottom" :style="{width: width + 'px'}">
+				<div class="agree_vip_item">
+					<image class="home_Agreement_img" src="../../../static/mineImg/mine_anniu.png" v-if="!argreement"
+						@click="unArgreement">
+						<image class="home_Agreement_img" src="../../../static/mineImg/mine_annius.png" v-if="argreement"
+							@click="unArgreement">
+							<text class="home_Agreement_text" @click="unArgreement">我已认真阅读并同意《</text><text class="home_Agreement_text"
+								@click.stop="to_protocol" style="color: #496DF5">会员认证费用协议</text><text class="home_Agreement_text">》</text>
+				</div>
+				<div class="pay_for_vip">
+					<div class="pay_for_vip_money">
+						<text class="pay_for_vip_money_money">{{(power_item.memberFee / 100).toFixed(2)}}</text>
+						<text class="pay_for_vip_money_text">元</text>
+					</div>
+					<div class="pay_for_vip_text" @click="openVip">
+						<text class="pay_for_vip_text_text">开通会员</text>
+					</div>
+				</div>
+			</div>
+			<!-- 会员开通结束 -->
+		</div>
+	</div>
+
+</template>
+<script>
+	import http from '@/utils/request'
+	export default {
+		data() {
+			return {
+				argreement: false,//同意协议
+				iStatusBarHeight: 0,   //顶部高度
+				width: 0,
+				feeConfigureId: '',
+				choiceItem: 0,
+				vipAuthTabs: [],
+				power_item: {},
+				payMsg: '',
+				payType: 2
+			}
+		},
+		onLoad() {
+			console.log('vip------vip---->')
+			this.iStatusBarHeight = uni.getSystemInfoSync().statusBarHeight
+			this.width = uni.getSystemInfoSync().windowWidth + 1
+			this.initData()
+		},
+		onShow() {
+			const subNVue = uni.getSubNVueById('sureToast')
+			subNVue.onMessage(res => {
+				subNVue.show('slide-in-bottom', 300, function () {
+					// 打开后进行一些操作...  
+					//   
+				})
+				subNVue.postMessage({
+					content: res.data.content
+				})
+			})
+		},
+		onHide() {
+		},
+		methods: {
+			initData() {
+				let that = this
+				http('get', 'feeConfigure/list', { type: 0 }, res => {
+					if (res.code == 200) {
+						if (res.data.length === 0) return
+						that.vipAuthTabs = res.data
+						that.power_item = res.data[0]
+						that.feeConfigureId = res.data[0].feeConfigureId
+					}
+				})
+			},
+			// 是否同意协议
+			unArgreement() {
+				this.argreement = !this.argreement
+			},
+			// 返回
+			leave() {
+				uni.navigateBack({})
+			},
+			// 选择会员权益
+			choiceVipPower(e, i) {
+				this.choiceItem = i
+				this.power_item = e
+				this.feeConfigureId = e.feeConfigureId
+			},
+			to_protocol() {
+				uni.navigateTo({
+					url: '/pages/statistic/protocol/vip'
+				})
+			},
+			// 开通会员
+			openVip() {
+				let that = this
+				const subNVue = uni.getSubNVueById('sureToast')
+				const subNVuePay = uni.getSubNVueById('publish')
+				if (!this.argreement) {
+					// uni.showToast({
+					// 	title: '请阅读并同意会员认证费用协议',
+					// 	duration: 2000,
+					// 	icon: 'none'
+					// });
+					subNVue.show('slide-in-bottom', 300, function () {
+						// 打开后进行一些操作...  
+						//   
+					});
+					
+					uni.$emit('getAgree',{
+						msg: '请阅读并同意会员认证费用协议'
+					})
+					// subNVue.postMessage({
+					// 	content: '请阅读并同意会员认证费用协议'
+					// });
+				} else {
+					if(this.power_item.memberFee == 0) {
+						let data = {
+							feeConfigureId: this.feeConfigureId,
+							payType: 1
+						}
+						http('put', 'clientUser/member', data, res => {
+							if (res.code == 200) {
+								// uni.showToast({
+								// 	title: '开通成功',
+								// 	duration: 2000
+								// });
+								
+								uni.$emit('getAgree',{
+									msg: '开通免费会员成功'
+								})
+								// subNVue.postMessage({
+								// 	content: '开通免费会员成功'
+								// })
+								subNVue.show('slide-in-bottom', 300, function () {
+									// 打开后进行一些操作...  
+									//   
+								})
+							}
+						})
+						return
+					}
+					subNVuePay.show('slide-in-bottom', 300, function () {
+						// 打开后进行一些操作...  
+						//   
+					});
+					
+					uni.$emit('action_publish',{
+						vip: 1,
+						feeConfigureId: that.feeConfigureId
+					})
+					// subNVuePay.postMessage({
+					// 	vip: 1,
+					// 	feeConfigureId: that.feeConfigureId
+					// })
+				}
+			}
+		},
+		onNavigationBarButtonTap: function onNavigationBarButtonTap(e) {
+			uni.navigateBack({
+				delta: 1
+			});
+		}
+	}
+</script>
+<style>
+	.vip_auth_wrap {
+		background-color: #fff;
+		flex: 1;
+		z-index: 10;
+	}
+	.vipAuth {
+		flex: 1;
+		background-color: #fff;
+		z-index: 1;
+		padding-bottom: 103px;
+	}
+
+	/* 头部部分开始 */
+	.vipAuth_headers {
+		height: 246px;
+		position: relative;
+	}
+
+	.vipAuth_header {
+		height: 164px;
+	}
+
+	.vip_tip {
+		background-color: rgba(240, 102, 99, 1);
+		width: 72px;
+		height: 24px;
+		position: absolute;
+		top: 15px;
+		left: 0;
+		border-top-left-radius: 1px;
+		border-top-right-radius: 8px;
+		border-bottom-right-radius: 1px;
+		border-bottom-left-radius: 8px;
+	}
+
+	.vip_tip_text {
+		width: 72px;
+		height: 24px;
+		line-height: 24px;
+		text-align: center;
+		font-size: 13px;
+		font-weight: 400;
+		color: rgba(255, 255, 255, 1);
+	}
+
+	.vipAuth_header_title {
+		position: absolute;
+		flex-direction: row;
+		align-items: center;
+		top: 30px;
+		left: 14px;
+	}
+
+	.vipAuth_header_img {
+		width: 24px;
+		height: 24px;
+	}
+
+	.vipAuth_header_text {
+		font-size: 18px;
+		color: #FFFFFF;
+		margin-left: 12px;
+	}
+
+	/* 头部部分结束 */
+	/* 滑块部分开始 */
+	.vipAuth_tag {
+		position: absolute;
+		/* top:10px; */
+	}
+
+	.vipAuth_play_view {
+		position: absolute;
+		flex-direction: row;
+		top: 84px;
+		height: 150px;
+		padding-left: 10px;
+	}
+
+	.vipAuth_tag_box_wrap {
+		height: 150px;
+		padding-top: 30px;
+	}
+
+	.vipAuth_tag_box {
+		width: 150px;
+		height: 112px;
+		background-color: rgba(255, 255, 255, 1);
+		box-shadow: 0px 2px 10px 0px rgba(21, 21, 22, 0.08);
+		border-radius: 8px;
+		border-color: rgba(213, 219, 238, 1);
+		border-style: solid;
+		border-width: 1px;
+		margin-right: 10px;
+
+	}
+
+	.vipAuth_tag_box_chioce {
+		background-color: rgba(233, 237, 253, 1);
+		box-shadow: 0px 2px 10px 0px rgba(21, 21, 22, 0.08);
+		border-radius: 8px;
+		border-color: rgba(85, 118, 245, 1);
+		border-style: solid;
+		border-width: 2px;
+	}
+
+	.vipAuth_one_view {
+		align-items: center;
+		justify-content: center;
+		position: relative;
+		height: 100%;
+	}
+
+	.vipAuth_tag_pun {
+		padding: 0 10px;
+		height: 24px;
+		background-color: #F06663;
+		position: absolute;
+		left: 0;
+		top: -12px;
+	}
+
+	.vipAuth_txt {
+		font-size: 14px;
+		font-weight: 400;
+		color: rgba(46, 46, 50, 1);
+		margin-top: 20px;
+	}
+
+	.vipAuth_money {
+		align-items: flex-end;
+		flex-direction: row;
+		margin-top: 18px;
+	}
+
+	.vipAuth_money_biao {
+		font-size: 16px;
+		color: #496DF5;
+		margin-right: 5px;
+		margin-bottom: 5px;
+		line-height: 20px;
+	}
+
+	.vipAuth_money_biaos {
+		font-size: 30px;
+		color: #496DF5;
+		line-height: 36px;
+	}
+
+	/* 滑块部分结束 */
+	/* 会员权益开始 */
+	.vip_power {
+		flex: 1;
+		height: 100%;
+		background:#fff;
+		z-index: 10;
+		padding: 10px 12px 0px;
+	}
+
+	.vip_power_title {
+		font-size: 18px;
+		font-weight: 600;
+		color: rgba(46, 46, 50, 1);
+		line-height: 22px;
+	}
+
+	.power_single {
+		flex-direction: row;
+		align-items: center;
+		margin-top: 24px;
+		background:#fff;
+	}
+
+	.power_single_img {
+		height: 44px;
+		width: 44px;
+		margin-right: 12px;
+	}
+
+	.power_single_text_box {
+		flex-direction: row;
+		height: 44px;
+		line-height: 44px;
+	}
+
+	.power_single_text {
+		height: 44px;
+		line-height: 44px;
+		font-size: 15px;
+		font-weight: 500;
+		color: rgba(46, 46, 50, 1);
+	}
+
+	/* 同意协议 */
+	.agree_vip_item {
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		height: 49px;
+	}
+
+	.home_Agreement_img {
+		height: 12px;
+		width: 12opx;
+		margin-right: 5px;
+	}
+
+	.home_Agreement_text {
+		font-size: 10px;
+		font-weight: 400;
+		color: rgba(0, 0, 0, 1);
+	}
+
+	.vip_bottom {
+		position: fixed;
+		bottom: 0;
+		height: 103px;
+		background-color: #F6F6F6;
+	}
+
+	.pay_for_vip {
+		height: 54px;
+		flex-direction: row;
+	}
+
+	.pay_for_vip_money {
+		width: 225px;
+		background-color: #fff;
+		flex-direction: row;
+		align-items: center;
+	}
+
+	.pay_for_vip_money_money {
+		font-size: 24px;
+		color: rgba(73, 109, 245, 1);
+		margin-left: 24px;
+	}
+
+	.pay_for_vip_money_text {
+		font-size: 14px;
+		color: rgba(73, 109, 245, 1);
+		margin-top: 5px;
+	}
+
+	.pay_for_vip_text {
+		flex: 1;
+		height: 54px;
+		background-color: rgba(73, 109, 245, 1);
+		justify-content: center;
+		align-items: center;
+	}
+
+	.pay_for_vip_text_text {
+		font-size: 18px;
+		font-weight: 400;
+		color: rgba(255, 255, 255, 1);
+	}
+</style>

@@ -1,0 +1,109 @@
+<template>
+  <div class="changeAccount_box">
+    <!--  -->
+    <div class="changeAccount_one">
+      <text class="changeAccount_one_text1">已绑定支付宝账号</text>
+      <text class="changeAccount_one_text2">{{payAli}}</text>
+    </div>
+    <div class="changeAccount_switch_box">
+      <text class="changeAccount_switch_btn" @click="toBindAli">切换绑定账号</text>
+    </div>
+  </div>
+</template>
+
+<script>
+import http from '@/utils/request'
+
+export default {
+  /**
+   * @param onNavigationBarButtonTap
+   * 监听导航栏按钮
+   * left 返回
+   * right 保存
+   */
+  onNavigationBarButtonTap: function onNavigationBarButtonTap(e) {
+    if (e.float === "left") {
+      //返回
+      uni.navigateBack({
+        delta: 1
+      });
+    }
+  },
+  data() {
+    return {
+      payAli: ''
+    }
+  },
+  onLoad() {
+    
+  },
+  methods: {
+    toBindAli() {
+      uni.navigateTo({
+        url: '/pages/statistic/mine/bindAli'
+      })
+    },
+    // GET /clientUser/account
+    getPayAli() {
+      http('get', 'clientUser/account', {}, res => {
+        if (res.code === '200') {
+          const getAliPay = res.data.alipay
+          if (getAliPay) {
+            this.payAli = getAliPay.substr(0,3) + '****' + getAliPay.substr(getAliPay.length -4, getAliPay.length)
+          }
+        }
+      })
+    }
+  },
+  computed: {
+    userInfo() {
+      return this.$store.state.getUserInfo
+    }
+  },
+  created() {
+    this.getPayAli()
+  },
+}
+</script>
+
+<style>
+
+.changeAccount_box{
+  flex: 1;
+  background-color:#F6F6F6;
+}
+
+.changeAccount_one{
+  background-color: #fff;
+  height: 106rpx;
+  flex-direction: row;
+  padding-left: 40rpx;
+  align-items: center;
+  margin-bottom: 16rpx;
+}
+
+.changeAccount_one_text1{
+  font-size:28rpx;
+  font-family:PingFangSC-Regular,PingFang SC;
+  color:rgba(0,0,0,1);
+  margin-right: 16rpx;
+}
+
+.changeAccount_one_text2{
+  font-size:28rpx;
+  font-family:PingFangSC-Regular,PingFang SC;
+  color:rgba(73,109,245,1);
+}
+
+.changeAccount_switch_box{
+  align-items: flex-end;
+  padding-right: 32rpx;
+}
+
+.changeAccount_switch_btn{
+  font-size:24rpx;
+  font-family:PingFangSC-Regular,PingFang SC;
+  color:rgba(73,109,245,1);
+  line-height:40rpx;
+}
+</style>

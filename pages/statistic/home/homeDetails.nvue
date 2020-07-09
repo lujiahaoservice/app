@@ -1,0 +1,401 @@
+<template>
+	<div class="taskDetail_box">
+		<scroll-view scroll-y=true show-scrollbar=false>
+			<!-- 基础信息 -->
+			<div class="basic_info">
+				<div class="basic_left">
+					<image class="basci_img" mode="aspectFill" src="https://static-shanghai.hanku.net.cn/yongqin/taskDetail/timg.jpeg" alt="">
+					<text class="basic_name">张MEI 女</text>
+				</div>
+				<div class="basic_right">
+					<text class="basic_price">¥300</text>
+					<text class="basic_time">1小时前</text>
+				</div>
+			</div>
+			<!-- 任务类型 + 任务标题 + 任务详情 -->
+			<div class="task_type">
+				<text class="task_type_text_1">任务类型</text>
+				<text class="task_type_text_2">跑腿任务</text>
+				<text class="task_type_text_3">帮买</text>
+			</div>
+			<div class="task_titAndDetail">
+				<div class="task_tit">
+					<text class="task_tit_text_1">任务标题</text>
+					<text class="task_tit_text_2">设计一个商城logo</text>
+				</div>
+				<div class="task_detail">
+					<text class="task_detail_text_1">任务详情</text>
+					<text class="task_detail_text_2">提供logo设计,品牌设计,文案策划,品牌定位,品牌提升,品牌策略等专业品牌服务.logo设计 百人创意团队,4年30城布局全国.品牌精准把握,预定成功席位.</text>
+				</div>
+			</div>
+			<!-- 三张图片 -->
+			<scroll-view class="task_scroll_box" scroll-x="true" show-scrollbar="true">
+				<block class="task_scroll">
+					<image mode="aspectFill" src="https://static-shanghai.hanku.net.cn/yongqin/taskDetail/timg.jpeg" alt="" class="task_scroll_img"></image>
+					<image mode="aspectFill" src="https://static-shanghai.hanku.net.cn/yongqin/taskDetail/timg.jpeg" alt="" class="task_scroll_img"></image>
+					<image mode="aspectFill" src="https://static-shanghai.hanku.net.cn/yongqin/taskDetail/timg.jpeg" alt="" class="task_scroll_img"></image>
+				</block>
+			</scroll-view>
+			<!-- 完成时间1 -->
+			<div class="task_finish_box">
+				<div class="task_finish_time common_time">
+					<text class="task_finish_time_l">完成时间</text>
+					<text class="task_finish_time_r">2019-01-01 12:00:00</text>
+				</div>
+				<div class="task_finish_address common_time">
+					<text class="task_finish_time_l">发布地点</text class="task_finish_time_l">
+					<text class="task_finish_time_r">浙江省 杭州市 江干区 德信早城11幢 11单元1101室</text>
+				</div>
+				<div class="task_finish_address common_time">
+					<text class="task_finish_time_l">完成地点</text class="task_finish_time_l">
+					<text class="task_finish_time_r">浙江省 杭州市 江干区 德信早城11幢 11单元1101室</text>
+				</div>
+			</div>
+			<!-- 底部 -->
+			<div class="task_bottom">
+				<div class="home_details_btn_box">
+					<div class="home_details_btn">
+						<text class="home_details_btn_text">接单</text>
+					</div>
+				</div>
+				<div class="home_Agreement_box">
+					<div class="home_Agreement">
+						<image class="home_Agreement_img" src="../../../static/mineImg/mine_anniu.png" v-if="!argreement" @click="unArgreement"></image>
+						<image class="home_Agreement_img" src="../../../static/mineImg/mine_annius.png" v-if="argreement" @click="unArgreement"></image>
+						<text class="home_Agreement_text_black">我已认真阅读并同意《</text><text class="home_Agreement_text_blue">接单协议</text><text class="home_Agreement_text_black">》</text>
+					</div>
+				</div>
+			</div>
+		</scroll-view>
+	</div class="taskDetail_box">
+</template>
+
+<script>
+	import uniSteps from '@/components/uni-steps/uni-steps.vue'
+	export default { 
+		components: {
+			uniSteps
+		},
+		onLoad () {
+			
+		},
+		data() { 	
+			return {
+				argreement: true,
+				steps: [
+					{
+						title: '待接单',
+						desc: '08-09 13:14'
+					}, 
+					{
+						title: '进行中',
+						desc: '08-09 13:14'
+					},
+					{
+						title: '待验收',
+						desc: '08-09 13:14'
+					},
+					{
+						title: '已完成',
+						desc: '08-09 13:14'
+					}
+				]
+			}
+		},
+		onNavigationBarButtonTap: function onNavigationBarButtonTap(e) {
+			uni.navigateBack({
+				delta: 1
+			});
+		},
+		onPullDownRefresh() {
+			uni.stopPullDownRefresh();
+		},
+		onReachBottom() {
+			
+		},
+		methods: {
+			unArgreement() {
+				this.argreement = !this.argreement
+			}
+		}
+	}
+</script>
+
+<style scoped>
+	.taskDetail_box{
+		flex: 1;
+		background-color: #F6F6F6;
+	}
+	/* steps */
+	.steps_{
+		height: 100px;
+		background-color: #fff;
+		padding-top: 20px;
+		border-top-width: 1px;
+		border-top-style: solid;
+		border-top-color: #F3F3F3;
+	}
+	/* 基础信息 */
+	.basic_info{
+		height:80px;
+		padding-left: 12px;
+		padding-right: 18px;
+		background-color:rgba(255,255,255,1);
+		border-top-width: 1px;
+		border-top-style: solid;
+		border-top-color: #F3F3F3;
+		flex-direction: row;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 5px;
+	}
+	.basic_left{
+		align-items: center;
+		flex-direction: row;
+	}
+	
+	.basci_img{
+		width:60px;
+		height:60px;
+		border-radius: 50%;
+		margin-right: 14px;
+	}
+	
+	.basic_name{
+		font-size:14px;
+		font-family:PingFangSC-Semibold,PingFang SC;
+		font-weight:600;
+		color:rgba(0,0,0,1);
+	}
+	
+	.basic_right{
+		height: 41px;
+		justify-content: space-between;
+	}
+	
+	.basic_price{
+		font-size:10px;
+		font-family:PingFangSC-Semibold,PingFang SC;
+		font-weight:600;
+		color:rgba(214,10,10,1);
+		line-height:14px;
+	}
+	
+	.basic_time{
+		font-size:10px;
+		font-family:PingFangSC-Regular,PingFang SC;
+		font-weight:400;
+		color:rgba(0,0,0,1);
+		line-height:14px;
+	}
+	/* 任务类型 + 任务标题 + 任务详情 */
+	
+	.task_type{
+		height:60px;
+		background-color:rgba(255,255,255,1);
+		flex-direction: row;
+		align-items: center;
+		padding-left: 18px;
+		margin-bottom: 5px;
+	}
+	
+	.task_type_text_1{
+		font-size:14px;
+		font-family:PingFangSC-Regular,PingFang SC;
+		color:rgba(170,170,170,1);
+		margin-right: 21px;
+	}
+	
+	.task_type_text_2{
+		font-size:14px;
+		font-family:PingFangSC-Regular,PingFang SC;
+		color:rgba(73,109,245,1);
+		margin-right: 22px;
+	}
+	
+	.task_type_text_3{
+		width:79px;
+		height:30px;
+		border-radius:8px;
+		border-width: 1px;
+		border-style: solid;
+		border-color: rgba(73,109,245,1);
+		font-size:14px;
+		font-family:PingFangSC-Regular,PingFang SC;
+		color:rgba(73,109,245,1);
+		line-height: 30px;
+		text-align: center;
+	}
+	
+	.task_titAndDetail{
+		padding-left: 15px;
+		padding-right: 15px;
+		background-color: #fff;
+		margin-bottom: 5px;
+	}
+	/* 三张图片 */
+	.task_scroll_box{
+		width:750rpx;
+		height:200rpx;
+		background-color:rgba(255,255,255,1);
+	}
+	.task_scroll{
+		width:690rpx;
+		height:200rpx;
+		padding-left: 15px;
+		padding-right: 15px;
+		background-color:rgba(255,255,255,1);
+		flex-direction: row;
+		align-items: center;
+	}
+	.task_scroll_img{
+		width: 120rpx;
+		height: 120rpx;
+		margin-right: 35px;
+	}
+	/* 完成时间 */
+	.task_finish_box{
+		width:750rpx;
+		height:384rpx;
+		background-color:rgba(255,255,255,1);
+		margin-top: 5px;
+		/* border-width: 1px; */
+	}
+	.common_time{
+		flex-direction: row;
+		align-items: center;
+		margin-left: 30rpx;
+		margin-right: 30rpx;
+	}
+	.common_task_finish_box{
+		margin-bottom: 40rpx;
+		height: 272rpx;
+	}
+	.task_finish_time{
+		height: 126rpx;
+		border-bottom-width: 1px;
+		border-style: solid;
+		border-color: #F1F1F1;
+	}
+	.task_finish_address{
+		height: 134rpx;
+		border-bottom-width: 1px;
+		border-style: solid;
+		border-color: #F1F1F1;
+	}
+	.task_finish_phone{
+		height: 120rpx;
+	}
+	.task_finish_time_l{
+		font-size:14px;
+		font-weight:400;
+		color:rgba(170,170,170,1);
+		padding-left: 3px;
+		/* line-height:20px; */
+	}
+	.task_finish_time_r{
+		flex: 1;
+		font-size:14px;
+		font-weight:400;
+		color:rgba(0,0,0,1);
+		margin-left: 10px;
+		/* line-height:20px; */
+	}
+	.task_finish_img{
+		width: 80rpx;
+		height: 80rpx;
+		margin-left: 24rpx;
+	}
+	/* task_bottom */
+	.task_bottom{
+		height:114px;
+		background-color:#F6F6F6;
+		flex: 1;
+	}
+	.home_details_btn_box{
+		margin-top: 20px;
+		justify-content: center;
+		flex-direction: row;
+	}
+	.home_details_btn{
+		width:240px;
+		height:50px;
+		background-color:rgba(73,109,245,1);
+		border-radius:8px;
+	}
+	.home_details_btn_text{
+		color: #fff;
+		width:240px;
+		height:50px;
+		text-align: center;
+		font-size:16px;
+		font-weight:600;
+		line-height:50px;
+	}
+	.home_Agreement_box{
+		margin-top: 10px;
+		flex-direction: row;
+		justify-content: center;
+	}
+	.home_Agreement{
+		flex-direction: row;
+		align-items: center;
+	}
+	.home_Agreement_img{
+		height: 12px;
+		width: 12px;
+		margin-right: 10px;
+	}
+	.home_Agreement_text_black{
+		font-size:10px;
+		font-weight:400;
+		color:rgba(0,0,0,1);
+	}
+	.home_Agreement_text_blue{
+		font-size:10px;
+		font-weight:400;
+		color:rgba(73,109,245,1);
+	}
+	/*  */
+	.task_tit{
+		height: 60px;
+		border-bottom-width: 1px;
+		border-bottom-style: solid;
+		border-bottom-color: #F3F3F3;
+		flex-direction: row;
+		align-items: center;
+	}
+	
+	.task_tit_text_1{
+		font-size:14px;
+		font-family:PingFangSC-Regular,PingFang SC;
+		margin-right: 10px;
+	}
+	
+	.task_tit_text_2{
+		font-size:14px;
+		font-family:PingFangSC-Regular,PingFang SC;
+		color:rgba(0,0,0,1);
+	}
+	
+	.task_detail{
+		height: 167px;
+		padding-top: 20px;
+		padding-bottom: 20px;
+	}
+	
+	.task_detail_text_1{
+		font-size:14px;
+		font-family:PingFangSC-Regular,PingFang SC;
+		color:rgba(170,170,170,1);
+		line-height:20px;
+		margin-bottom: 5px;
+	}
+	
+	.task_detail_text_2{
+		font-size:14px;
+		font-family:PingFangSC-Regular,PingFang SC;
+		color:rgba(0,0,0,1);
+		line-height:20px;
+	}
+</style>
